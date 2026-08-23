@@ -19785,6 +19785,42 @@ document.addEventListener('change',function(e){
   };
   window.__dscanSessionPhotoCache=window.__dscanSessionPhotoCache||{};
 
+  /* Durable runtime mirror (IndexedDB) — protects field work when localStorage History is full
+     or a tablet/browser process is discarded. It stores session metadata/rows only, not photo blobs. */
+  if(!window.DSCAN_RuntimeRecovery){
+    window.DSCAN_RuntimeRecovery=(function(){
+      const DB='dscan_runtime_recovery_v1',STORE='sessions',LATEST='latest';
+      const tombstoneKey=id=>`deleted:${String(id||'')}`;
+      function open(){return new Promise((resolve,reject)=>{try{const r=indexedDB.open(DB,1);r.onupgradeneeded=()=>{const db=r.result;if(!db.objectStoreNames.contains(STORE))db.createObjectStore(STORE,{keyPath:'key'})};r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)}catch(e){reject(e)}})}
+      async function save(session){
+        if(!session?.id||!('indexedDB' in window))return false;
+        const payload={key:LATEST,savedAt:new Date().toISOString(),session:JSON.parse(JSON.stringify(session))};
+        try{const db=await open();await new Promise((resolve,reject)=>{const tx=db.transaction(STORE,'readwrite');const st=tx.objectStore(STORE);st.delete(tombstoneKey(session.id));st.put(payload);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error)});db.close();return true}catch(e){console.error('[DSCAN recovery save]',e);return false}
+      }
+      async function load(){
+        if(!('indexedDB' in window))return null;
+        try{
+          const db=await open();
+          const row=await new Promise((resolve,reject)=>{const tx=db.transaction(STORE,'readonly');const r=tx.objectStore(STORE).get(LATEST);r.onsuccess=()=>resolve(r.result||null);r.onerror=()=>reject(r.error)});
+          if(!row?.session?.id){db.close();return null}
+          const tomb=await new Promise((resolve,reject)=>{const tx=db.transaction(STORE,'readonly');const r=tx.objectStore(STORE).get(tombstoneKey(row.session.id));r.onsuccess=()=>resolve(r.result||null);r.onerror=()=>reject(r.error)});
+          db.close();
+          if(tomb?.deletedAt && String(tomb.deletedAt)>=String(row.savedAt||''))return null;
+          return row;
+        }catch(e){console.error('[DSCAN recovery load]',e);return null}
+      }
+      async function remove(sessionId){
+        sessionId=String(sessionId||'');if(!sessionId||!('indexedDB' in window))return false;
+        try{
+          const db=await open();
+          const latest=await new Promise((resolve,reject)=>{const tx=db.transaction(STORE,'readonly');const r=tx.objectStore(STORE).get(LATEST);r.onsuccess=()=>resolve(r.result||null);r.onerror=()=>reject(r.error)});
+          await new Promise((resolve,reject)=>{const tx=db.transaction(STORE,'readwrite');const st=tx.objectStore(STORE);if(String(latest?.session?.id||'')===sessionId)st.delete(LATEST);st.put({key:tombstoneKey(sessionId),sessionId,deletedAt:new Date().toISOString()});tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error)});
+          db.close();return true;
+        }catch(e){console.error('[DSCAN recovery remove]',e);return false}
+      }
+      return Object.freeze({save,load,remove});
+    })();
+  }
   function clone(v){try{return JSON.parse(JSON.stringify(v))}catch(e){return v}}
   function readJson(k,f){try{const v=JSON.parse(localStorage.getItem(k)||'null');return v==null?f:v}catch(e){return f}}
   function writeJson(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){console.error(e);return false}}
@@ -19793,13 +19829,23 @@ document.addEventListener('change',function(e){
   function purgeOrphanActiveSession(){
     const list=history().filter(x=>x?.id);
     const cur=session();
-    if(cur?.id && list.some(x=>String(x.id)===String(cur.id)))return cur;
+
+    /* DATA-SAFETY INVARIANT:
+       A valid ACTIVE session is never deleted merely because History is missing/stale.
+       History is an index/cache; SESSION_KEY is the live canonical checkpoint.
+       Previous behavior could erase a field session after a History quota/write failure. */
     if(cur?.id){
-      const owner=String(cur.inspectorEmpNo||'').replace(/\D/g,'').slice(0,8);
-      const map=readJson('dscan_active_sessions_by_inspector_v1',{});
-      if(owner&&map&&typeof map==='object'&&!Array.isArray(map)){delete map[owner];writeJson('dscan_active_sessions_by_inspector_v1',map)}
+      window.DSCAN_INSPECTION_SESSION=cur;
+      if(!list.some(x=>String(x.id)===String(cur.id))){
+        try{
+          const repaired=updateHistoryItem(cur);
+          if(!repaired)console.warn('[DSCAN recovery] Active session kept even though History repair failed.');
+        }catch(e){console.error('[DSCAN recovery] History repair failed; active session preserved.',e)}
+      }
+      return cur;
     }
-    localStorage.removeItem(SESSION_KEY);
+
+    /* No active checkpoint exists. Do not manufacture/delete historical sessions here. */
     window.DSCAN_INSPECTION_SESSION=null;
     if(!list.length){
       setRows([]);setPhotos([]);
@@ -19902,8 +19948,7 @@ document.addEventListener('change',function(e){
     const rr=currentRows();
 
     if(completed){
-      /* Completed sessions are immutable and completedRows is the only canonical row snapshot.
-         Never recreate runtimeRows/initialRows from DOM during post-completion wrappers. */
+      /* Completed sessions are immutable and completedRows is the only canonical row snapshot. */
       if((!Array.isArray(s.completedRows)||!s.completedRows.length) && rr.length && rr.every(r=>rowBelongsToSession(r,s))){
         s.completedRows=clone(rr);
         s.completedRowCount=rr.length;
@@ -19912,21 +19957,62 @@ document.addEventListener('change',function(e){
       delete s.initialRows;
     }else if(rr.length && rr.every(r=>rowBelongsToSession(r,s))){
       s.runtimeRows=clone(rr);
-      if(!Array.isArray(s.initialRows)||!s.initialRows.length){
-        try{
-          const fresh=window.profileRows?.(s.checklistProfile,s)||[];
-          if(fresh.length)s.initialRows=stampRowsForSession(fresh,s);
-        }catch(e){}
-      }
+      /* initialRows is reproducible from the Profile Master and must not be duplicated in the live checkpoint. */
+      delete s.initialRows;
+      delete s.completedRows;
     }
 
     try{s.uiColumnState=readJson(AUDIT_COL_STORE,{})||{}}catch(e){s.uiColumnState={}}
     s.lastSavedAt=nowIso();
-    writeJson(SESSION_KEY,s);
-    updateHistoryItem(s);
+
+    /* SESSION_KEY is the primary durable checkpoint. Never silently continue if it was not written. */
+    const sessionSaved=writeJson(SESSION_KEY,s);
+    if(sessionSaved){
+      window.DSCAN_INSPECTION_SESSION=s;
+      try{window.DSCAN_RuntimeRecovery?.save?.(s)}catch(e){console.error('[DSCAN recovery mirror]',e)}
+    }else{
+      try{window.DSCAN_RuntimeRecovery?.save?.(s)}catch(e){console.error('[DSCAN recovery emergency mirror]',e)}
+      console.error('[DSCAN persistence] Active session localStorage write failed.');
+      try{window.showDscanToast?.('저장공간 문제로 기본 저장에 실패했습니다. 복구 저장소에 보존을 시도합니다.','danger')}catch(e){}
+    }
+
+    /* History is secondary. A History failure must never invalidate/delete the active session. */
+    try{updateHistoryItem(s)}catch(e){console.error('[DSCAN history] non-fatal save failure',e)}
     window.__dscanSessionPhotoCache[s.id]=currentPhotos().slice();
+    /* Canonical persistence boundary: photo persistence is invoked here directly.
+       Do not wrap persistCurrentInspectionSnapshot again in later modules. */
+    try{window.DSCANPhotoPersistence?.persist?.(s.id)}catch(e){console.error('[DSCAN photo mirror]',e)}
     return s;
   };
+
+  /* Tablet/mobile lifecycle: flush the current edit synchronously before the page is hidden,
+     backgrounded, discarded, navigated away from, or closed. */
+  function flushOperationalCheckpoint(){
+    try{window.cancelScheduledInspectionPersist?.()}catch(e){}
+    try{window.persistCurrentInspectionSnapshot?.()}catch(e){console.error('[DSCAN lifecycle checkpoint]',e)}
+  }
+  document.addEventListener('visibilitychange',()=>{if(document.hidden)flushOperationalCheckpoint()},true);
+  window.addEventListener('pagehide',flushOperationalCheckpoint,true);
+  window.addEventListener('beforeunload',flushOperationalCheckpoint,true);
+
+  /* Cold-start recovery: only if the primary active checkpoint is absent.
+     Restore the latest IndexedDB mirror, then reload once so every legacy module boots from the same canonical session. */
+  (function recoverMissingActiveCheckpoint(){
+    if(session()?.id || !window.DSCAN_RuntimeRecovery?.load)return;
+    window.DSCAN_RuntimeRecovery.load().then(row=>{
+      const recovered=row?.session;
+      if(!recovered?.id || session()?.id)return;
+      const ok=writeJson(SESSION_KEY,recovered);
+      if(!ok)return;
+      try{updateHistoryItem(recovered)}catch(e){}
+      window.DSCAN_INSPECTION_SESSION=recovered;
+      const flag='dscan_runtime_recovered_once';
+      if(sessionStorage.getItem(flag)!=='1'){
+        sessionStorage.setItem(flag,'1');
+        location.reload();
+      }
+    }).catch(e=>console.error('[DSCAN cold-start recovery]',e));
+  })();
 
   function sanitizeOperationalRows(list,s){
     return stampRowsForSession((Array.isArray(list)?list:[]).map(src=>{
@@ -20076,6 +20162,8 @@ ${target.site||'-'} 기술지원의 체크리스트·평가값·메모와 이 �
     const remain=list.filter(x=>String(x?.id)!==String(id));
     writeJson(HISTORY_KEY,remain);
     delete window.__dscanSessionPhotoCache[id];
+    /* Explicit deletion is authoritative: remove runtime recovery so a deleted session can never resurrect. */
+    try{window.DSCAN_RuntimeRecovery?.remove?.(id)}catch(e){console.error('[DSCAN recovery delete]',e)}
 
     if(!remain.length){
       const owners=new Set([current?.inspectorEmpNo,target?.inspectorEmpNo].map(v=>String(v||'').replace(/\D/g,'').slice(0,8)).filter(Boolean));
@@ -21920,12 +22008,8 @@ ${err?.message||err}`);
   }
   window.DSCANPhotoPersistence={persist:persistPhotos,restore:restorePhotos,remove:dbDelete,clear:dbClear};
 
-  // Persist whenever session snapshot is saved. Business snapshot remains untouched.
-  const oldPersist=window.persistCurrentInspectionSnapshot;
-  if(typeof oldPersist==='function'&&!oldPersist.__photoPersistent){
-    const wrapped=function(){const out=oldPersist.apply(this,arguments);const s=readSession();if(s?.id)persistPhotos(s.id);return out};
-    wrapped.__photoPersistent=true;window.persistCurrentInspectionSnapshot=wrapped;
-  }
+  // Session snapshot persistence calls DSCANPhotoPersistence.persist directly at the canonical boundary.
+  // No wrapper is installed here, preventing persistence call-order collisions.
   // Photo mutation APIs: save after the existing engine finishes.
   ['attachFilesToRow','importPhotosAsUnlinked','directConnectPhoto','unlinkPhoto','deleteAllUnlinkedPhotos'].forEach(name=>{
     const old=window[name];if(typeof old!=='function'||old.__photoPersistent)return;

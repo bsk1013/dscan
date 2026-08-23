@@ -1,17 +1,18 @@
-디스캔(DSCAN) PWA 패키지
+DSCAN v4.6.17 PWA — Data Persistence Recovery Fix
 
-구성
-- index.html : DSCAN v4.6.14 기반 + PWA 메타데이터/Service Worker 등록만 국소 추가
-- dscan.webmanifest : 앱 이름 디스캔(DSCAN), standalone 설정
-- sw.js : 앱 셸 및 CDN 라이브러리 오프라인 캐시
-- icons/ : 사용자 제공 favicon.pub 아이콘 원본
+GitHub Pages 배포 시 이 폴더의 내용을 dscan 저장소 루트에 그대로 업로드하세요.
+- index.html
+- sw.js
+- dscan.webmanifest
+- icons/
 
-배포
-1) 이 폴더의 파일/폴더 구조를 그대로 GitHub Pages 루트(또는 동일한 HTTPS 웹 루트)에 업로드합니다.
-2) 반드시 HTTPS 또는 localhost에서 실행해야 PWA 설치/Service Worker가 작동합니다. file:// 직접 실행에서는 PWA 등록이 동작하지 않습니다.
-3) Chrome/Edge/Android에서는 브라우저의 '앱 설치' 메뉴로 설치할 수 있습니다.
-4) iPhone/iPad Safari에서는 공유 → 홈 화면에 추가를 사용합니다.
+중요: 기존 v4.6.15 사용자는 새 sw.js까지 반드시 함께 교체해야 새 캐시 버전으로 전환됩니다.
 
-보호 원칙
-- Service Worker는 DSCAN의 localStorage, IndexedDB, 세션, 사진, ZIP, 완료/LOCK 데이터를 수정하지 않습니다.
-- PWA 추가는 앱 셸(HTML/manifest/icon/CDN 정적 라이브러리) 캐시에 한정됩니다.
+핵심 안정화:
+1) Active Session이 History에서 누락되어도 삭제하지 않고 History를 복구
+2) 입력 중 260ms debounce 저장 + background/pagehide/beforeunload 즉시 checkpoint
+3) localStorage active session 저장 실패 시 IndexedDB 복구 mirror 저장 시도
+4) 다음 시작에서 SESSION_KEY가 없으면 IndexedDB mirror를 복구 후 1회 reload
+5) History 저장 실패는 Active Session 삭제 사유가 아님
+
+사진 Blob 자체는 기존 DSCAN 사진 persistence 체계를 그대로 사용합니다.
