@@ -19902,7 +19902,7 @@ document.addEventListener('change',function(e){
 
   /* Briefing checkbox durability guard — lightweight, session-scoped shadow only.
      This does not duplicate full rows/photos; it mirrors only briefingIncluded booleans. */
-  const BRIEF_FLAG_SHADOW_KEY='dscan_briefing_flag_shadow_v1';
+  const BRIEF_FLAG_SHADOW_KEY='dscan_briefing_flag_shadow_v2';
   function briefingFlagRowKey(r,i){
     const pid=String(r?.profileId||r?.sourceSession?.profileId||'');
     const no=String(r?.no??(Number(i)+1));
@@ -19915,15 +19915,28 @@ document.addEventListener('change',function(e){
   function writeBriefFlagShadow(all){
     try{localStorage.setItem(BRIEF_FLAG_SHADOW_KEY,JSON.stringify(all||{}));return true}catch(e){console.error('[DSCAN briefing flag shadow]',e);return false}
   }
-  function mirrorBriefingFlags(s,list){
+  function seedBriefingFlags(s,list){
     if(!s?.id||!Array.isArray(list))return false;
     const all=readBriefFlagShadow();
-    const flags={};
-    list.forEach((r,i)=>{if(typeof r?.briefingIncluded==='boolean')flags[briefingFlagRowKey(r,i)]=r.briefingIncluded});
-    all[String(s.id)]={updatedAt:new Date().toISOString(),flags};
-    const keys=Object.keys(all).sort((a,b)=>String(all[b]?.updatedAt||'').localeCompare(String(all[a]?.updatedAt||'')));
-    keys.slice(60).forEach(k=>delete all[k]);
-    return writeBriefFlagShadow(all);
+    const sid=String(s.id);
+    const entry=all[sid]&&typeof all[sid]==='object'?all[sid]:{flags:{}};
+    if(!entry.flags||typeof entry.flags!=='object')entry.flags={};
+    let changed=false;
+    list.forEach((r,i)=>{
+      const k=briefingFlagRowKey(r,i);
+      if(!Object.prototype.hasOwnProperty.call(entry.flags,k) && typeof r?.briefingIncluded==='boolean'){
+        entry.flags[k]=r.briefingIncluded;
+        changed=true;
+      }
+    });
+    if(changed||!all[sid]){
+      entry.updatedAt=new Date().toISOString();
+      all[sid]=entry;
+      const keys=Object.keys(all).sort((a,b)=>String(all[b]?.updatedAt||'').localeCompare(String(all[a]?.updatedAt||'')));
+      keys.slice(60).forEach(k=>delete all[k]);
+      return writeBriefFlagShadow(all);
+    }
+    return true;
   }
   function mirrorOneBriefingFlag(s,r,i,value){
     if(!s?.id)return false;
@@ -19950,7 +19963,13 @@ document.addEventListener('change',function(e){
   window.DSCAN_saveBriefingFlag=function(row,index,value){
     const s=session();
     if(!s?.id)return false;
+    /* Explicit checkbox interaction is the only authoritative writer for an existing shadow flag.
+       Generic persistence must never overwrite this value from a later legacy row normalization. */
     return mirrorOneBriefingFlag(s,row,index,value);
+  };
+  window.DSCAN_applyBriefingFlagShadow=function(list){
+    const s=session();
+    return applyBriefingFlagShadow(s,list);
   };
   function setRows(v){try{rows=Array.isArray(v)?clone(v):[]}catch(e){console.error(e)}}
   function setPhotos(v){try{photos=Array.isArray(v)?v:[]}catch(e){console.error(e)}}
@@ -20038,6 +20057,11 @@ document.addEventListener('change',function(e){
     const completed=!!(s.locked===true||s.status==='완료'||s.status==='완료·LOCK');
     const rr=currentRows();
 
+    /* Checkbox shadow is authoritative once a user has explicitly changed a flag.
+       Reapply it BEFORE cloning runtime/completed rows so a legacy render/normalizer cannot
+       silently reset briefingIncluded during autosave, lifecycle flush, tab switch, or reload. */
+    try{applyBriefingFlagShadow(s,rr)}catch(e){console.error('[DSCAN briefing flag pre-persist restore]',e)}
+
     if(completed){
       /* Completed sessions are immutable and completedRows is the only canonical row snapshot. */
       if((!Array.isArray(s.completedRows)||!s.completedRows.length) && rr.length && rr.every(r=>rowBelongsToSession(r,s))){
@@ -20053,9 +20077,9 @@ document.addEventListener('change',function(e){
       delete s.completedRows;
     }
 
-    /* Mirror only the briefing flags as a tiny independent checkpoint.
-       This protects checkbox intent even if a later legacy row normalization loses the field. */
-    try{mirrorBriefingFlags(s,completed?s.completedRows:s.runtimeRows)}catch(e){console.error('[DSCAN briefing flag mirror]',e)}
+    /* Seed only missing shadow keys. Never overwrite an existing explicit checkbox decision
+       from generic persistence; that was the v4.6.19 reset path. */
+    try{seedBriefingFlags(s,completed?s.completedRows:s.runtimeRows)}catch(e){console.error('[DSCAN briefing flag seed]',e)}
 
     try{s.uiColumnState=readJson(AUDIT_COL_STORE,{})||{}}catch(e){s.uiColumnState={}}
     s.lastSavedAt=nowIso();
