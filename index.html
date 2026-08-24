@@ -8572,6 +8572,7 @@ function bindRowInputs(){
     if(briefingToggle){
       briefingToggle.addEventListener('change',()=>{
         rows[i].briefingIncluded=!!briefingToggle.checked;
+        try{window.DSCAN_saveBriefingFlag?.(rows[i],i,rows[i].briefingIncluded)}catch(e){console.error('[DSCAN briefing flag immediate mirror]',e)}
         const txt=briefingToggle.closest('.briefingToggleLabel')?.querySelector('span');
         if(txt)txt.textContent=briefingToggle.checked?'포함':'제외';
         try{
@@ -16748,6 +16749,7 @@ document.addEventListener('change',function(e){
         /* v4.5.87 — this is the FINAL operational input handler actually used by the audit table.
            Persist the flag in the same transaction as the UI change. */
         r.briefingIncluded=!!br.checked;
+        try{window.DSCAN_saveBriefingFlag?.(r,i,r.briefingIncluded)}catch(e){console.error('[DSCAN briefing flag immediate mirror]',e)}
         const sp=br.closest('label')?.querySelector('span');
         if(sp)sp.textContent=br.checked?'포함':'제외';
 
@@ -19897,6 +19899,59 @@ document.addEventListener('change',function(e){
   function nowIso(){return new Date().toISOString()}
   function currentRows(){try{return (typeof rows!=='undefined'&&Array.isArray(rows))?rows:[]}catch(e){return []}}
   function currentPhotos(){try{return (typeof photos!=='undefined'&&Array.isArray(photos))?photos:[]}catch(e){return []}}
+
+  /* Briefing checkbox durability guard — lightweight, session-scoped shadow only.
+     This does not duplicate full rows/photos; it mirrors only briefingIncluded booleans. */
+  const BRIEF_FLAG_SHADOW_KEY='dscan_briefing_flag_shadow_v1';
+  function briefingFlagRowKey(r,i){
+    const pid=String(r?.profileId||r?.sourceSession?.profileId||'');
+    const no=String(r?.no??(Number(i)+1));
+    return `${pid}|${no}`;
+  }
+  function readBriefFlagShadow(){
+    const x=readJson(BRIEF_FLAG_SHADOW_KEY,{})||{};
+    return (x&&typeof x==='object'&&!Array.isArray(x))?x:{};
+  }
+  function writeBriefFlagShadow(all){
+    try{localStorage.setItem(BRIEF_FLAG_SHADOW_KEY,JSON.stringify(all||{}));return true}catch(e){console.error('[DSCAN briefing flag shadow]',e);return false}
+  }
+  function mirrorBriefingFlags(s,list){
+    if(!s?.id||!Array.isArray(list))return false;
+    const all=readBriefFlagShadow();
+    const flags={};
+    list.forEach((r,i)=>{if(typeof r?.briefingIncluded==='boolean')flags[briefingFlagRowKey(r,i)]=r.briefingIncluded});
+    all[String(s.id)]={updatedAt:new Date().toISOString(),flags};
+    const keys=Object.keys(all).sort((a,b)=>String(all[b]?.updatedAt||'').localeCompare(String(all[a]?.updatedAt||'')));
+    keys.slice(60).forEach(k=>delete all[k]);
+    return writeBriefFlagShadow(all);
+  }
+  function mirrorOneBriefingFlag(s,r,i,value){
+    if(!s?.id)return false;
+    const all=readBriefFlagShadow();
+    const sid=String(s.id);
+    const entry=all[sid]&&typeof all[sid]==='object'?all[sid]:{flags:{}};
+    if(!entry.flags||typeof entry.flags!=='object')entry.flags={};
+    entry.flags[briefingFlagRowKey(r,i)]=!!value;
+    entry.updatedAt=new Date().toISOString();
+    all[sid]=entry;
+    return writeBriefFlagShadow(all);
+  }
+  function applyBriefingFlagShadow(s,list){
+    if(!s?.id||!Array.isArray(list))return list;
+    const entry=readBriefFlagShadow()[String(s.id)];
+    const flags=entry?.flags;
+    if(!flags||typeof flags!=='object')return list;
+    list.forEach((r,i)=>{
+      const k=briefingFlagRowKey(r,i);
+      if(Object.prototype.hasOwnProperty.call(flags,k))r.briefingIncluded=!!flags[k];
+    });
+    return list;
+  }
+  window.DSCAN_saveBriefingFlag=function(row,index,value){
+    const s=session();
+    if(!s?.id)return false;
+    return mirrorOneBriefingFlag(s,row,index,value);
+  };
   function setRows(v){try{rows=Array.isArray(v)?clone(v):[]}catch(e){console.error(e)}}
   function setPhotos(v){try{photos=Array.isArray(v)?v:[]}catch(e){console.error(e)}}
   function profileName(s){return s?.checklistProfileName||PROFILE_NAMES[s?.checklistProfile]||s?.checklistProfile||'-'}
@@ -19997,6 +20052,10 @@ document.addEventListener('change',function(e){
       delete s.initialRows;
       delete s.completedRows;
     }
+
+    /* Mirror only the briefing flags as a tiny independent checkpoint.
+       This protects checkbox intent even if a later legacy row normalization loses the field. */
+    try{mirrorBriefingFlags(s,completed?s.completedRows:s.runtimeRows)}catch(e){console.error('[DSCAN briefing flag mirror]',e)}
 
     try{s.uiColumnState=readJson(AUDIT_COL_STORE,{})||{}}catch(e){s.uiColumnState={}}
     s.lastSavedAt=nowIso();
@@ -20121,6 +20180,9 @@ document.addEventListener('change',function(e){
     else if(Array.isArray(s.completedRows)&&s.completedRows.length)rr=clone(s.completedRows);
     else if(Array.isArray(s.initialRows)&&s.initialRows.length)rr=clone(s.initialRows);
     else rr=cleanFreshRows(s);
+    /* Reapply the session-scoped checkbox shadow before rendering.
+       Only briefingIncluded is touched; scores/text/photos/laws remain canonical row data. */
+    rr=applyBriefingFlagShadow(s,rr);
     rr=stampRowsForSession(rr,s);
     setRows(rr);
     setPhotos([]);
