@@ -15215,6 +15215,7 @@ document.addEventListener('change',function(e){
 
     try{
       localStorage.removeItem(SESSION_KEY);
+      try{window.DSCAN_RuntimeJournal?.clearSession?.(session.id)}catch(e){console.error('[DSCAN delete journal clear]',e)}
 
       const history=readHistory().filter(x=>String(x?.id)!==String(session.id));
       localStorage.setItem(HISTORY_KEY,JSON.stringify(history));
@@ -16400,8 +16401,11 @@ document.addEventListener('change',function(e){
   const oldResume=window.resumeInspection;
   window.resumeInspection=function(){
     const s=currentSession();
-    if(s?.checklistProfile && (!rows.length || rows[0]?.sourceSession?.id!==s.id)){
-      rows=profileRows(s.checklistProfile,s);
+    /* Resume must reopen the durable session snapshot, never regenerate Master profile rows.
+       Regenerating profileRows here was able to replace saved scores with fresh defaults before autosave. */
+    if(s?.id && typeof window.activateInspectionSession==='function'){
+      window.activateInspectionSession(s.id,true);
+      return;
     }
     if(typeof oldResume==='function')oldResume();
   };
@@ -16581,6 +16585,7 @@ document.addEventListener('change',function(e){
        Never read the pre-click DOM value back into rows here. */
     r.earnedScore=Number(v);
     syncDerived(r);
+    try{window.DSCAN_RuntimeJournal?.writeFields?.(r,i,{earnedScore:r.earnedScore,evaluationStatus:r.evaluationStatus})}catch(e){console.error('[DSCAN score journal]',e)}
 
     /* Update only the clicked row's score controls. Do not rebuild the checklist. */
     const tr=document.querySelector(`#tbl tbody tr[data-row="${i}"]`);
@@ -16606,12 +16611,14 @@ document.addEventListener('change',function(e){
   window.setEvaluationStatus=function(i,v){
     const r=rows[i];if(!r)return;
     r.evaluationStatus=v;syncDerived(r);
+    try{window.DSCAN_RuntimeJournal?.writeFields?.(r,i,{evaluationStatus:r.evaluationStatus,earnedScore:r.earnedScore})}catch(e){console.error('[DSCAN status journal]',e)}
     try{window.persistCurrentInspectionSnapshot?.()}catch(e){console.error('[DSCAN status save]',e)}
     renderRows();rebuildBriefingItems();renderBriefingList();
   };
   window.setResultCategory=function(i,v){
     const r=rows[i];if(!r)return;
     r.resultCategory=v;syncDerived(r);
+    try{window.DSCAN_RuntimeJournal?.write?.(r,i,'resultCategory',r.resultCategory)}catch(e){console.error('[DSCAN result journal]',e)}
     try{window.persistCurrentInspectionSnapshot?.()}catch(e){console.error('[DSCAN result save]',e)}
     renderRows();rebuildBriefingItems();renderBriefingList();
   };
@@ -16728,10 +16735,9 @@ document.addEventListener('change',function(e){
       if(score){
         const f=()=>{
           r.earnedScore=score.value===''?'':Number(score.value);
-          try{
-            window.syncRowsFromTable?.();
-            window.persistCurrentInspectionSnapshot?.();
-          }catch(e){console.error('[DSCAN direct score save]',e)}
+          syncDerived(r);
+          try{window.DSCAN_RuntimeJournal?.writeFields?.(r,i,{earnedScore:r.earnedScore,evaluationStatus:r.evaluationStatus})}catch(e){console.error('[DSCAN direct score journal]',e)}
+          try{window.persistCurrentInspectionSnapshot?.();}catch(e){console.error('[DSCAN direct score save]',e)}
           refreshScoreSummary();
           rebuildBriefingItems();
           renderBriefingList();
@@ -16742,7 +16748,12 @@ document.addEventListener('change',function(e){
       const finding=tr.querySelector('.f-finding');
       if(finding){
         finding.style.minHeight='74px';
-        finding.addEventListener('input',e=>{r.mainText=e.target.value;try{SHELegal.scheduleRowSearch(i,r.mainText||r.criteria)}catch(x){}rebuildBriefingItems();renderBriefingList();});
+        finding.addEventListener('input',e=>{
+          r.mainText=e.target.value;
+          try{window.DSCAN_RuntimeJournal?.write?.(r,i,'mainText',r.mainText)}catch(x){console.error('[DSCAN finding journal]',x)}
+          try{SHELegal.scheduleRowSearch(i,r.mainText||r.criteria)}catch(x){}
+          rebuildBriefingItems();renderBriefingList();
+        });
       }
       const br=tr.querySelector('.f-briefingIncluded');
       if(br)br.addEventListener('change',()=>{
@@ -19351,6 +19362,7 @@ document.addEventListener('change',function(e){
     }
 
     const live=currentRows();
+    try{window.DSCAN_RuntimeJournal?.apply?.(s,live)}catch(e){console.error('[DSCAN completion journal restore]',e)}
     if(!live.length){
       window.showDscanToast?.('저장할 체크리스트가 없습니다.','danger');
       return;
@@ -19900,76 +19912,133 @@ document.addEventListener('change',function(e){
   function currentRows(){try{return (typeof rows!=='undefined'&&Array.isArray(rows))?rows:[]}catch(e){return []}}
   function currentPhotos(){try{return (typeof photos!=='undefined'&&Array.isArray(photos))?photos:[]}catch(e){return []}}
 
-  /* Briefing checkbox durability guard — lightweight, session-scoped shadow only.
-     This does not duplicate full rows/photos; it mirrors only briefingIncluded booleans. */
-  const BRIEF_FLAG_SHADOW_KEY='dscan_briefing_flag_shadow_v2';
-  function briefingFlagRowKey(r,i){
+  /* ===== Critical Runtime Journal v1 =====
+     A single lightweight write-through guard for human-entered runtime values.
+     It NEVER stores photos, laws, checklist masters, or full rows.
+     Explicit user actions are authoritative writers; generic render/autosave may only seed missing values. */
+  const RUNTIME_JOURNAL_KEY='dscan_critical_runtime_journal_v1';
+  const LEGACY_BRIEF_FLAG_SHADOW_KEY='dscan_briefing_flag_shadow_v2';
+  const JOURNAL_FIELDS=['earnedScore','evaluationStatus','resultCategory','mainText','briefingIncluded'];
+
+  function runtimeJournalRowKey(r,i){
     const pid=String(r?.profileId||r?.sourceSession?.profileId||'');
     const no=String(r?.no??(Number(i)+1));
     return `${pid}|${no}`;
   }
-  function readBriefFlagShadow(){
-    const x=readJson(BRIEF_FLAG_SHADOW_KEY,{})||{};
+  function readRuntimeJournal(){
+    const x=readJson(RUNTIME_JOURNAL_KEY,{})||{};
     return (x&&typeof x==='object'&&!Array.isArray(x))?x:{};
   }
-  function writeBriefFlagShadow(all){
-    try{localStorage.setItem(BRIEF_FLAG_SHADOW_KEY,JSON.stringify(all||{}));return true}catch(e){console.error('[DSCAN briefing flag shadow]',e);return false}
+  function writeRuntimeJournal(all){
+    try{localStorage.setItem(RUNTIME_JOURNAL_KEY,JSON.stringify(all||{}));return true}
+    catch(e){console.error('[DSCAN runtime journal]',e);return false}
   }
-  function seedBriefingFlags(s,list){
-    if(!s?.id||!Array.isArray(list))return false;
-    const all=readBriefFlagShadow();
-    const sid=String(s.id);
-    const entry=all[sid]&&typeof all[sid]==='object'?all[sid]:{flags:{}};
-    if(!entry.flags||typeof entry.flags!=='object')entry.flags={};
-    let changed=false;
-    list.forEach((r,i)=>{
-      const k=briefingFlagRowKey(r,i);
-      if(!Object.prototype.hasOwnProperty.call(entry.flags,k) && typeof r?.briefingIncluded==='boolean'){
-        entry.flags[k]=r.briefingIncluded;
-        changed=true;
-      }
-    });
-    if(changed||!all[sid]){
-      entry.updatedAt=new Date().toISOString();
-      all[sid]=entry;
-      const keys=Object.keys(all).sort((a,b)=>String(all[b]?.updatedAt||'').localeCompare(String(all[a]?.updatedAt||'')));
-      keys.slice(60).forEach(k=>delete all[k]);
-      return writeBriefFlagShadow(all);
+  function normalizeJournalValue(field,value){
+    if(field==='briefingIncluded')return !!value;
+    if(field==='earnedScore'){
+      if(value===''||value===null||value===undefined)return '';
+      const n=Number(value);return Number.isFinite(n)?n:value;
     }
+    return value==null?'':String(value);
+  }
+  function ensureJournalSession(all,s){
+    const sid=String(s?.id||'');
+    if(!sid)return null;
+    let entry=all[sid];
+    if(!entry||typeof entry!=='object'||Array.isArray(entry))entry={rows:{},revision:0};
+    if(!entry.rows||typeof entry.rows!=='object'||Array.isArray(entry.rows))entry.rows={};
+    all[sid]=entry;
+    return entry;
+  }
+  function writeRuntimeField(s,r,i,field,value){
+    if(!s?.id||!JOURNAL_FIELDS.includes(field))return false;
+    const all=readRuntimeJournal();
+    const entry=ensureJournalSession(all,s);if(!entry)return false;
+    const k=runtimeJournalRowKey(r,i);
+    const rowEntry=entry.rows[k]&&typeof entry.rows[k]==='object'?entry.rows[k]:{fields:{},revision:0};
+    if(!rowEntry.fields||typeof rowEntry.fields!=='object')rowEntry.fields={};
+    rowEntry.fields[field]=normalizeJournalValue(field,value);
+    rowEntry.revision=Number(rowEntry.revision||0)+1;
+    rowEntry.updatedAt=new Date().toISOString();
+    entry.revision=Number(entry.revision||0)+1;
+    entry.updatedAt=rowEntry.updatedAt;
+    entry.rows[k]=rowEntry;
+    all[String(s.id)]=entry;
+    const keys=Object.keys(all).sort((a,b)=>String(all[b]?.updatedAt||'').localeCompare(String(all[a]?.updatedAt||'')));
+    keys.slice(80).forEach(k=>delete all[k]);
+    return writeRuntimeJournal(all);
+  }
+  function seedRuntimeJournal(s,list){
+    if(!s?.id||!Array.isArray(list))return false;
+    const all=readRuntimeJournal();
+    const entry=ensureJournalSession(all,s);if(!entry)return false;
+    let changed=false;
+
+    /* One-time migration of the proven v4.6.21 briefing checkbox shadow. */
+    try{
+      const legacy=readJson(LEGACY_BRIEF_FLAG_SHADOW_KEY,{})?.[String(s.id)]?.flags||{};
+      list.forEach((r,i)=>{
+        const k=runtimeJournalRowKey(r,i);
+        if(Object.prototype.hasOwnProperty.call(legacy,k)){
+          const re=entry.rows[k]&&typeof entry.rows[k]==='object'?entry.rows[k]:{fields:{},revision:0};
+          if(!re.fields||typeof re.fields!=='object')re.fields={};
+          if(!Object.prototype.hasOwnProperty.call(re.fields,'briefingIncluded')){
+            re.fields.briefingIncluded=!!legacy[k];re.updatedAt=new Date().toISOString();entry.rows[k]=re;changed=true;
+          }
+        }
+      });
+    }catch(e){console.error('[DSCAN journal briefing migration]',e)}
+
+    list.forEach((r,i)=>{
+      const k=runtimeJournalRowKey(r,i);
+      const re=entry.rows[k]&&typeof entry.rows[k]==='object'?entry.rows[k]:{fields:{},revision:0};
+      if(!re.fields||typeof re.fields!=='object')re.fields={};
+      JOURNAL_FIELDS.forEach(field=>{
+        if(!Object.prototype.hasOwnProperty.call(re.fields,field) && Object.prototype.hasOwnProperty.call(r||{},field)){
+          re.fields[field]=normalizeJournalValue(field,r[field]);changed=true;
+        }
+      });
+      if(changed){re.updatedAt=re.updatedAt||new Date().toISOString();entry.rows[k]=re;}
+    });
+    if(changed){entry.updatedAt=new Date().toISOString();all[String(s.id)]=entry;return writeRuntimeJournal(all)}
     return true;
   }
-  function mirrorOneBriefingFlag(s,r,i,value){
-    if(!s?.id)return false;
-    const all=readBriefFlagShadow();
-    const sid=String(s.id);
-    const entry=all[sid]&&typeof all[sid]==='object'?all[sid]:{flags:{}};
-    if(!entry.flags||typeof entry.flags!=='object')entry.flags={};
-    entry.flags[briefingFlagRowKey(r,i)]=!!value;
-    entry.updatedAt=new Date().toISOString();
-    all[sid]=entry;
-    return writeBriefFlagShadow(all);
-  }
-  function applyBriefingFlagShadow(s,list){
+  function applyRuntimeJournal(s,list){
     if(!s?.id||!Array.isArray(list))return list;
-    const entry=readBriefFlagShadow()[String(s.id)];
-    const flags=entry?.flags;
-    if(!flags||typeof flags!=='object')return list;
+    const entry=readRuntimeJournal()[String(s.id)];
+    const stored=entry?.rows;if(!stored||typeof stored!=='object')return list;
     list.forEach((r,i)=>{
-      const k=briefingFlagRowKey(r,i);
-      if(Object.prototype.hasOwnProperty.call(flags,k))r.briefingIncluded=!!flags[k];
+      const fields=stored[runtimeJournalRowKey(r,i)]?.fields;
+      if(!fields||typeof fields!=='object')return;
+      JOURNAL_FIELDS.forEach(field=>{
+        if(Object.prototype.hasOwnProperty.call(fields,field))r[field]=normalizeJournalValue(field,fields[field]);
+      });
+      try{syncDerived(r)}catch(e){}
     });
     return list;
   }
+  function clearRuntimeJournalSession(sessionId){
+    const sid=String(sessionId||'');if(!sid)return false;
+    const all=readRuntimeJournal();if(!Object.prototype.hasOwnProperty.call(all,sid))return true;
+    delete all[sid];return writeRuntimeJournal(all);
+  }
+
+  window.DSCAN_RuntimeJournal={
+    write:function(row,index,field,value){const s=session();return writeRuntimeField(s,row,index,field,value)},
+    writeFields:function(row,index,fields){const s=session();if(!s?.id||!fields)return false;let ok=true;Object.entries(fields).forEach(([k,v])=>{if(JOURNAL_FIELDS.includes(k))ok=writeRuntimeField(s,row,index,k,v)&&ok});return ok},
+    seed:function(s,list){return seedRuntimeJournal(s,list)},
+    apply:function(s,list){return applyRuntimeJournal(s,list)},
+    clearSession:clearRuntimeJournalSession,
+    key:RUNTIME_JOURNAL_KEY
+  };
+
+  /* Backward-compatible API used by the existing checkbox handler; now writes into the unified journal. */
   window.DSCAN_saveBriefingFlag=function(row,index,value){
-    const s=session();
-    if(!s?.id)return false;
-    /* Explicit checkbox interaction is the only authoritative writer for an existing shadow flag.
-       Generic persistence must never overwrite this value from a later legacy row normalization. */
-    return mirrorOneBriefingFlag(s,row,index,value);
+    const s=session();if(!s?.id)return false;
+    return writeRuntimeField(s,row,index,'briefingIncluded',value);
   };
   window.DSCAN_applyBriefingFlagShadow=function(list){
-    const s=session();
-    return applyBriefingFlagShadow(s,list);
+    const s=session();return applyRuntimeJournal(s,list);
   };
   function setRows(v){try{rows=Array.isArray(v)?clone(v):[]}catch(e){console.error(e)}}
   function setPhotos(v){try{photos=Array.isArray(v)?v:[]}catch(e){console.error(e)}}
@@ -20060,7 +20129,7 @@ document.addEventListener('change',function(e){
     /* Checkbox shadow is authoritative once a user has explicitly changed a flag.
        Reapply it BEFORE cloning runtime/completed rows so a legacy render/normalizer cannot
        silently reset briefingIncluded during autosave, lifecycle flush, tab switch, or reload. */
-    try{applyBriefingFlagShadow(s,rr)}catch(e){console.error('[DSCAN briefing flag pre-persist restore]',e)}
+    try{applyRuntimeJournal(s,rr)}catch(e){console.error('[DSCAN runtime journal pre-persist restore]',e)}
 
     if(completed){
       /* Completed sessions are immutable and completedRows is the only canonical row snapshot. */
@@ -20079,7 +20148,7 @@ document.addEventListener('change',function(e){
 
     /* Seed only missing shadow keys. Never overwrite an existing explicit checkbox decision
        from generic persistence; that was the v4.6.19 reset path. */
-    try{seedBriefingFlags(s,completed?s.completedRows:s.runtimeRows)}catch(e){console.error('[DSCAN briefing flag seed]',e)}
+    try{seedRuntimeJournal(s,completed?s.completedRows:s.runtimeRows)}catch(e){console.error('[DSCAN runtime journal seed]',e)}
 
     try{s.uiColumnState=readJson(AUDIT_COL_STORE,{})||{}}catch(e){s.uiColumnState={}}
     s.lastSavedAt=nowIso();
@@ -20206,7 +20275,9 @@ document.addEventListener('change',function(e){
     else rr=cleanFreshRows(s);
     /* Reapply the session-scoped checkbox shadow before rendering.
        Only briefingIncluded is touched; scores/text/photos/laws remain canonical row data. */
-    rr=applyBriefingFlagShadow(s,rr);
+    /* Reapply explicit human-entered values before any render/normalizer can touch them. */
+    try{seedRuntimeJournal(s,rr)}catch(e){console.error('[DSCAN runtime journal restore seed]',e)}
+    rr=applyRuntimeJournal(s,rr);
     rr=stampRowsForSession(rr,s);
     setRows(rr);
     setPhotos([]);
@@ -20284,8 +20355,9 @@ ${target.site||'-'} 기술지원의 체크리스트·평가값·메모와 이 �
     const remain=list.filter(x=>String(x?.id)!==String(id));
     writeJson(HISTORY_KEY,remain);
     delete window.__dscanSessionPhotoCache[id];
-    /* Explicit deletion is authoritative: remove runtime recovery so a deleted session can never resurrect. */
+    /* Explicit deletion is authoritative: remove every recovery layer for this session. */
     try{window.DSCAN_RuntimeRecovery?.remove?.(id)}catch(e){console.error('[DSCAN recovery delete]',e)}
+    try{window.DSCAN_RuntimeJournal?.clearSession?.(id)}catch(e){console.error('[DSCAN runtime journal delete]',e)}
 
     if(!remain.length){
       const owners=new Set([current?.inspectorEmpNo,target?.inspectorEmpNo].map(v=>String(v||'').replace(/\D/g,'').slice(0,8)).filter(Boolean));
@@ -20390,6 +20462,8 @@ ${target.site||'-'} 기술지원의 체크리스트·평가값·메모와 이 �
     if(!confirm(message))return;
 
     try{
+      /* Explicit user reset invalidates prior field-level recovery decisions for this session. */
+      try{window.DSCAN_RuntimeJournal?.clearSession?.(s.id)}catch(e){console.error('[DSCAN reset journal clear]',e)}
       let base=Array.isArray(s.initialRows)&&s.initialRows.length
         ? sanitizeOperationalRows(clone(s.initialRows),s)
         : cleanFreshRows(s);
