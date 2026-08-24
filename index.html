@@ -6357,6 +6357,9 @@ body:has(#tab-home.active) .topbar-shell{
 /* Briefing relationship-law disclosure */
 #tab-briefing .dscan-law-detail-brief{margin-top:7px!important}
 #tab-briefing .dscan-law-detail-brief #metaLawText{padding:9px!important;font-size:9.5px!important;line-height:1.55!important;color:#c2cfdd!important;white-space:pre-wrap!important}
+#tab-briefing .dscan-brief-law-link{padding:7px 9px;margin:0 0 6px;border:1px solid #314763;border-radius:8px;background:#0d1b2c;color:#d7e5f5;cursor:default}
+#tab-briefing .dscan-brief-law-link[role="button"]{cursor:pointer}
+#tab-briefing .dscan-brief-law-link[role="button"]:hover{border-color:#5b9dff;background:#13284a;color:#fff}
 
 /* Fixed audit columns: JS calculates exact table width. */
 #tbl.dscan-operational-table{table-layout:fixed!important;min-width:0!important}
@@ -17034,8 +17037,41 @@ document.addEventListener('change',function(e){
     metaText.textContent=String(item.row.mainText||'').trim()||'주요내용이 입력되지 않았습니다.';
     const criteria=document.getElementById('metaCriteria');
     if(criteria)criteria.textContent=item.row.criteria||'';
-    const details=document.getElementById('metaCriteriaDetails');
-    if(details)details.open=false;
+    const criteriaDetails=document.getElementById('metaCriteriaDetails');
+    if(criteriaDetails)criteriaDetails.open=false;
+
+    /* Briefing Legal: read the law references from the exact canonical briefing row.
+       completedRows / ZIP aggregate rows already preserve relatedLaws, so never rebuild
+       laws from the live input table and never mutate the row here. */
+    const lawBox=document.getElementById('metaLawText');
+    const lawDetails=document.getElementById('metaLawDetails');
+    if(lawBox){
+      lawBox.replaceChildren();
+      const refs=Array.isArray(item.row.relatedLaws)?item.row.relatedLaws.filter(Boolean):[];
+      if(refs.length){
+        refs.forEach(ref=>{
+          const primaryId=String(ref?.primaryId||'').trim();
+          const label=String(ref?.primaryLabel||ref?.label||ref?.title||ref?.primaryText||primaryId||'관계법령').trim();
+          const line=document.createElement('div');
+          line.className='dscan-brief-law-link';
+          line.textContent=label;
+          if(primaryId && !ref?.manual && typeof window.SHELegal?.openLawDetail==='function'){
+            line.setAttribute('role','button');
+            line.tabIndex=0;
+            line.title='법령 상세보기';
+            const open=()=>window.SHELegal.openLawDetail(primaryId);
+            line.addEventListener('click',open);
+            line.addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();open();}});
+          }
+          lawBox.appendChild(line);
+        });
+      }else{
+        const fallback=String(item.row.sourceLawText||'').trim();
+        lawBox.textContent=fallback||'등록된 관계법령이 없습니다.';
+      }
+    }
+    if(lawDetails)lawDetails.open=false;
+
     if(metaTag)metaTag.textContent=item.row.photoTag||'-';
     metaPhotoIndex.textContent=photo?`${currentPhotoIndex+1} / ${item.linkedPhotos.length} (${photo.name})`:'사진 없음';
   };
@@ -23266,24 +23302,7 @@ window.DSCANWorkTransfer={
   }
 };
 
-/* Briefing relation-law details */
-function syncBriefLaw(){
-  const item=(typeof briefingItems!=='undefined'&&Array.isArray(briefingItems))?briefingItems[currentItemIndex]:null;
-  const row=item?.row||null;
-  const box=document.getElementById('metaLawText'),details=document.getElementById('metaLawDetails');if(!box)return;
-  let text='';
-  try{text=String(window.SHELegal?.formatRowLaws?.(row)||'').trim()}catch(e){}
-  if(!text && Array.isArray(row?.relatedLaws)){
-    text=row.relatedLaws.map(x=>String(x?.primaryLabel||x?.label||x?.title||x?.primaryText||x?.primaryId||'').trim()).filter(Boolean).join('\n');
-  }
-  if(!text)text=String(row?.sourceLawText||'').trim();
-  box.textContent=text||'등록된 관계법령이 없습니다.';
-  if(details)details.open=false;
-}
-const oldMeta=window.renderMeta;
-if(typeof oldMeta==='function'){
-  window.renderMeta=function(){const out=oldMeta.apply(this,arguments);syncBriefLaw();return out};
-}
+/* Briefing relation-law rendering is integrated directly into the canonical renderMeta above. */
 
 /* Absolute, non-flexing operational table widths. Collapsing a column reduces only that column. */
 const COL_WIDTHS=[48,150,120,145,350,360,62,78,92,92,112,350,76,112,120];
