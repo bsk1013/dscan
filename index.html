@@ -7868,7 +7868,7 @@ body:not(.dscan-audit-active) #dscanAuditScrollJump{display:none!important}
     </div>
     <div class="dscan-work-transfer-rule">
       <b>안전 병합 규칙</b>
-      <span>현재값 우선 · 빈칸은 ZIP으로 보충 · 양쪽 값이 다르면 현재값 유지 후 충돌 표시 · 사진은 항목별 추가 병합</span>
+      <span>같은 사업장·파트·기술지원 기간만 병합 · 서로 다른 row는 그대로 추가 · 같은 row는 비충돌 필드만 병합 · 양쪽이 같은 필드를 다르게 수정한 경우 현재값을 보존하고 ZIP 값은 보류 · 사진은 합집합 · 관계법령도 동일한 3-way 규칙 적용</span>
     </div>
     <div class="dscan-work-transfer-options">
       <button type="button" class="recommended" id="dscanWorkMergeBtn" onclick="DSCANWorkTransfer.merge()">
@@ -9663,6 +9663,18 @@ function buildSessionObject(){
   const exportSession=(typeof getCurrentInspectionSession==='function'?getCurrentInspectionSession():null);
   const isFinalSession=!!(exportSession&&(exportSession.locked===true||exportSession.status==='완료'||exportSession.status==='완료·LOCK'));
   const canonicalExportRows=(isFinalSession&&Array.isArray(exportSession?.completedRows)&&exportSession.completedRows.length)?deepCloneSafe(exportSession.completedRows):deepCloneSafe(rows||[]);
+  /* Relationship-law edits are live user input. Even when a final/completed snapshot is the
+     row source, overlay the current row's legal refs by stable row identity before ZIP creation. */
+  try{
+    const liveRows=Array.isArray(rows)?rows:[];
+    const lawKey=(r,i)=>String(r?.no??'').trim()?`NO:${String(r.no).trim()}`:`TITLE:${String(r?.subCategory||r?.title||i).trim()}`;
+    const liveMap=new Map(liveRows.map((r,i)=>[lawKey(r,i),r]));
+    canonicalExportRows.forEach((r,i)=>{
+      const live=liveMap.get(lawKey(r,i));if(!live)return;
+      if(Array.isArray(live.relatedLaws))r.relatedLaws=deepCloneSafe(live.relatedLaws);
+      if(typeof live.sourceLawText==='string')r.sourceLawText=live.sourceLawText;
+    });
+  }catch(e){console.error('[DSCAN ZIP legal overlay]',e)}
   const safeFileName=(v)=>String(v||'photo.jpg').replace(/[\\/:*?"<>|]+/g,'_');
   const linkedPhotosOnly=photos.filter(p=>p.rowIndex!=='' && p.rowIndex!==null && p.rowIndex!==undefined);
   const photoMeta=linkedPhotosOnly.map((p,idx)=>{
@@ -12801,7 +12813,7 @@ body.briefing-mode-active #tab-briefing .viewerStage{
     const btn = document.getElementById('briefingModeBtn');
     if(!btn) return;
     const active = !!document.fullscreenElement && isBriefingMode;
-    btn.textContent = active ? '강평모드 종료' : '강평모드';
+    btn.textContent = active ? '강평 종료' : '강평 시작';
     btn.setAttribute('aria-pressed', active ? 'true' : 'false');
   }
   function deactivateCurrentTool(){
@@ -13265,6 +13277,14 @@ body.briefing-mode-active #tab-briefing .viewerStage{
     try{ return Array.isArray(rows) ? rows : []; }catch(e){ return []; }
   }
 
+  function persistRowLawMutation(i){
+    const r=getRows()[i];if(!r)return;
+    if(!Array.isArray(r.relatedLaws))r.relatedLaws=[];
+    r.sourceLawText=r.relatedLaws.map(x=>String(x?.primaryLabel||x?.primaryId||'').trim()).filter(Boolean).join('\n');
+    try{window.DSCAN_CriticalRuntimeJournal?.writeRow?.(r,i,{relatedLaws:r.relatedLaws,sourceLawText:r.sourceLawText})}catch(e){}
+    try{window.persistCurrentInspectionSnapshot?.()}catch(e){console.error('[DSCAN legal row persist]',e)}
+  }
+
   function renderRowLawCell(i){
     const allRows=getRows();
     const r=allRows[i];
@@ -13527,6 +13547,7 @@ body.briefing-mode-active #tab-briefing .viewerStage{
     }
 
     renderRowLawCell(i);
+    persistRowLawMutation(i);
 
     // 다중선택 편의: 선택 후 창을 닫지 않고 그대로 유지
     renderSuggestions(i,r.mainText||'',true);
@@ -13650,6 +13671,7 @@ body.briefing-mode-active #tab-briefing .viewerStage{
 
     input.value='';
     renderRowLawCell(i);
+    persistRowLawMutation(i);
     try{if(typeof log==='function')log('관계법령 직접 추가: '+raw);}catch(e){}
   }
 
@@ -13675,6 +13697,7 @@ body.briefing-mode-active #tab-briefing .viewerStage{
     if(selectedIndex>=0){
       r.relatedLaws.splice(selectedIndex,1);
       renderRowLawCell(i);
+      persistRowLawMutation(i);
       renderSuggestions(i,r.mainText||'',true);
       try{ if(typeof log==='function')log(`관계법령 선택 해제: ${label(x.article)}`); }catch(e){}
       return;
@@ -13915,6 +13938,7 @@ body.briefing-mode-active #tab-briefing .viewerStage{
     if(!r||!Array.isArray(r.relatedLaws))return;
     r.relatedLaws.splice(idx,1);
     renderRowLawCell(i);
+    persistRowLawMutation(i);
 
     // 삭제 후 옵션창이 열려 있으면 즉시 선택상태 해제
     const box=document.getElementById('lawSuggest_'+i);
@@ -13978,6 +14002,41 @@ body.briefing-mode-active #tab-briefing .viewerStage{
     current=recalcStats(obj);
     rebuildIndexes();
     if(save)await persist(current);
+  }
+
+  async function mergeSnapshotForRows(snapshot,importedRows){
+    if(!snapshot||!validateLawDb(snapshot)||!Array.isArray(importedRows)||!importedRows.length)return {applied:0};
+    const refs=new Set();
+    importedRows.forEach(r=>(r?.relatedLaws||[]).forEach(x=>{
+      if(x?.primaryId)refs.add(String(x.primaryId));
+      (x?.linkedIds||[]).forEach(id=>refs.add(String(id)));
+    }));
+    if(!refs.size)return {applied:0};
+    const incomingById=new Map((snapshot.articles||[]).map(a=>[String(a.id),a]));
+    const merged=JSON.parse(JSON.stringify(current||builtin()));
+    const curIndex=new Map((merged.articles||[]).map((a,i)=>[String(a.id),i]));
+    let applied=0;
+    refs.forEach(id=>{
+      const incoming=incomingById.get(id);if(!incoming)return;
+      const at=curIndex.get(id);
+      if(at===undefined){curIndex.set(id,merged.articles.length);merged.articles.push(JSON.parse(JSON.stringify(incoming)));applied++;}
+      else if(JSON.stringify(merged.articles[at])!==JSON.stringify(incoming)){merged.articles[at]=JSON.parse(JSON.stringify(incoming));applied++;}
+    });
+    const relKey=r=>`${r?.from||''}|${r?.to||''}|${r?.type||''}`;
+    const relMap=new Map((merged.relations||[]).map((r,i)=>[relKey(r),i]));
+    (snapshot.relations||[]).forEach(r=>{
+      if(!refs.has(String(r?.from||''))&&!refs.has(String(r?.to||'')))return;
+      const k=relKey(r),at=relMap.get(k);
+      if(at===undefined){relMap.set(k,merged.relations.length);merged.relations.push(JSON.parse(JSON.stringify(r)));}
+      else merged.relations[at]=JSON.parse(JSON.stringify(r));
+    });
+    if(applied){
+      merged.dbVersion=String(merged.dbVersion||'current')+'+ZIP';
+      merged.builtAt=new Date().toISOString();
+      await setCurrent(merged,true);
+      try{if(typeof log==='function')log(`ZIP 관계법령 스냅샷 반영: ${applied}개 조문`);}catch(e){}
+    }
+    return {applied};
   }
 
   function downloadJson(obj,name){
@@ -14584,7 +14643,7 @@ body.briefing-mode-active #tab-briefing .viewerStage{
     setResultLimit,toggleRowOptions,toggleLawGroupMore,addManualLaw,toggleResult,applyResult,removeLaw,openLawDetail,closeLawDetail,openCartoon,closeCartoon,backToLawDetail,cartoonZoom,cartoonResetZoom,openCartoonSource,openOfficialLaw,officialSearchUrl,
     toggleValidationCenter,runValidationQuery,openValidationDetail,openValidationOfficial,setValidationAnswer,removeValidationExpected,runRegression,loadValidationCase,deleteValidationCase,
     loadValidationExamples,exportValidation,importValidation,
-    formatRowLaws,exportLawDb,importLawDb,restoreBuiltin,
+    formatRowLaws,exportLawDb,importLawDb,restoreBuiltin,mergeSnapshotForRows,
     importSourceFiles,applyStagedUpdate,getLinked,
     get current(){return current;},get staged(){return staged;}
   };
@@ -21661,7 +21720,7 @@ ${err?.message||err}`);
       <div class="dscan-closing-title">${esc(site)} 기술지원 강평을 마칩니다.</div>
       <div class="dscan-closing-sub">${esc(range)}</div>
       <div class="dscan-closing-line"></div>
-      <div class="dscan-closing-message">오늘 확인한 위험요인은 이 것에서 끝나는 것이 아니라,<br>반드시 실행 가능한 개선과 재발방지로 연결되어야 합니다.</div>
+      <div class="dscan-closing-message">오늘 확인한 위험요인은 오늘로 끝나는 것이 아니라,<br>반드시 실행 가능한 개선과 재발방지로 연결되어야 합니다.</div>
       <div class="dscan-closing-meta"><span>전체 항목 ${st.total}</span><span>부적합 ${st.bad}</span><span>우수사례 ${st.good}</span><span>적합률 ${st.rate}%</span></div>
     </div>`;
   }
@@ -23160,12 +23219,29 @@ const hist=()=>{const h=read(HISTORY_KEY,[]);return Array.isArray(h)?h:[]};
 const eq=(a,b)=>JSON.stringify(a??null)===JSON.stringify(b??null);
 const blank=v=>v===null||v===undefined||v===''||(Array.isArray(v)&&!v.length)||(typeof v==='object'&&!Array.isArray(v)&&v&&Object.keys(v).length===0);
 const normalizeProfile=v=>String(v||'').trim();
+const canonicalDate=v=>{
+  const raw=String(v||'').trim();
+  const m=raw.match(/(\d{4})[.\/-]?(\d{1,2})[.\/-]?(\d{1,2})/);
+  if(!m)return '';
+  return `${m[1]}-${String(Number(m[2])).padStart(2,'0')}-${String(Number(m[3])).padStart(2,'0')}`;
+};
 const signature=s=>({
   site:String(s?.site||'').trim(),
-  start:String(s?.inspectionStartDate||s?.inspectionDate||'').trim(),
+  start:canonicalDate(s?.inspectionStartDate||s?.inspectionDate||''),
+  end:canonicalDate(s?.inspectionEndDate||s?.inspectionStartDate||s?.inspectionDate||''),
+  year:String(s?.year||'').trim(),
+  half:String(s?.half||'').trim(),
   profile:normalizeProfile(s?.checklistProfile||s?.profileId)
 });
-const sameSig=(a,b)=>{const x=signature(a),y=signature(b);return !!x.site&&x.site===y.site&&x.start===y.start&&x.profile===y.profile};
+const sameSig=(a,b)=>{
+  const x=signature(a),y=signature(b);
+  if(!x.site||x.site!==y.site||!x.profile||x.profile!==y.profile)return false;
+  if(x.start&&y.start){
+    const xe=x.end||x.start,ye=y.end||y.start;
+    return x.start<=ye&&y.start<=xe;
+  }
+  return !!x.year&&x.year===y.year&&(!x.half||!y.half||x.half===y.half);
+};
 
 function compactExistingHistoryOnce(){
   try{
@@ -23211,7 +23287,12 @@ async function readBundle(file){
     const p=await restorePhotoFromSessionMeta(zip,raw.photos[i],`work_${Date.now()}_${i}`);
     if(p)incomingPhotos.push(p);
   }
-  return{file,zip,raw,session,rows:incomingRows,photos:incomingPhotos,fieldDefs:deep(raw.fieldDefs||[])};
+  let lawDbSnapshot=null;
+  try{
+    const lawEntry=zip.file('legal/LawDB_snapshot.json');
+    if(lawEntry)lawDbSnapshot=JSON.parse(await lawEntry.async('string'));
+  }catch(e){console.warn('[DSCAN ZIP LawDB snapshot read]',e)}
+  return{file,zip,raw,session,rows:incomingRows,photos:incomingPhotos,fieldDefs:deep(raw.fieldDefs||[]),lawDbSnapshot};
 }
 
 function compactSessionForHistory(session){
@@ -23296,6 +23377,7 @@ async function setRuntime(bundle,s){
   try{window.rebuildBriefingItems?.();window.renderBriefingList?.();window.renderOperationalBriefingIntro?.()}catch(e){}
 }
 async function restoreBundle(bundle,{replaceId=null}={}){
+  try{await window.SHELegal?.mergeSnapshotForRows?.(bundle.lawDbSnapshot,bundle.rows||[])}catch(e){console.error('[DSCAN ZIP LawDB restore]',e)}
   const source=deep(bundle.session||{});
   source.id=replaceId||source.id||`dscan_import_${Date.now().toString(36)}_${Math.random().toString(36).slice(2,7)}`;
   source.schema=source.schema||'DSCAN-Inspection-Session';
@@ -23323,10 +23405,12 @@ function rowIdentity(r,i){
 function baselineMap(list){
   const m=new Map();(list||[]).forEach((r,i)=>m.set(rowIdentity(r,i),r));return m;
 }
-const MERGE_FIELDS=['criteria','mainText','finding','earnedScore','evaluationScore','scoreValue','evaluationStatus','resultCategory','result','riskType','photoTag','briefingIncluded'];
+const MERGE_FIELDS=['criteria','mainText','finding','earnedScore','evaluationScore','scoreValue','evaluationStatus','resultCategory','result','riskType','photoTag','briefingIncluded','sourceLawText','relatedLaws'];
 async function mergeSameSession(bundle){
   const s=active();if(!s?.id)throw new Error('현재 세션이 없습니다.');
-  if(!sameSig(s,bundle.session))throw new Error('사업장·시작일·파트가 다른 세션은 안전 병합할 수 없습니다.');
+  if(!sameSig(s,bundle.session))throw new Error('안전병합 대상이 아닙니다. 사업장·파트가 다르거나 기술지원 기간이 겹치지 않습니다. 현재 작업을 보호하기 위해 「별도 세션으로 불러오기」를 사용해주세요.');
+
+  try{await window.SHELegal?.mergeSnapshotForRows?.(bundle.lawDbSnapshot,bundle.rows||[])}catch(e){console.error('[DSCAN ZIP LawDB merge]',e)}
 
   const current=(typeof rows!=='undefined'&&Array.isArray(rows))?rows:[];
   const incoming=bundle.rows||[];
@@ -23345,29 +23429,19 @@ async function mergeSameSession(bundle){
     MERGE_FIELDS.forEach(field=>{
       const cv=cr?.[field],iv=ir?.[field];
       if(field==='briefingIncluded'&&typeof iv!=='boolean')return;
-      if(blank(iv))return;
       let take=false,conflict=false;
       if(cb&&ib){
         const cChanged=!eq(cv,cb?.[field]),iChanged=!eq(iv,ib?.[field]);
         if(!cChanged&&iChanged)take=true;
         else if(cChanged&&iChanged&&!eq(cv,iv))conflict=true;
-        else if(!cChanged&&!iChanged&&blank(cv)&&!blank(iv))take=true;
       }else{
         if(blank(cv)&&!blank(iv))take=true;
-        else if(!blank(cv)&&!eq(cv,iv))conflict=true;
+        else if(!blank(cv)&&!blank(iv)&&!eq(cv,iv))conflict=true;
       }
       if(take){cr[field]=deep(iv);applied++}
       else if(conflict)conflicts.push(`${key} · ${field}`);
     });
 
-    /* Laws are additive by identity/label. */
-    if(Array.isArray(ir.relatedLaws)&&ir.relatedLaws.length){
-      cr.relatedLaws=Array.isArray(cr.relatedLaws)?cr.relatedLaws:[];
-      ir.relatedLaws.forEach(l=>{
-        const id=String(l?.primaryId||l?.primaryLabel||JSON.stringify(l));
-        if(!cr.relatedLaws.some(x=>String(x?.primaryId||x?.primaryLabel||JSON.stringify(x))===id)){cr.relatedLaws.push(deep(l));applied++}
-      });
-    }
     /* User extra columns: current wins conflicts, ZIP fills blanks. */
     if(ir.extras&&typeof ir.extras==='object'){
       cr.extras=cr.extras&&typeof cr.extras==='object'?cr.extras:{};
@@ -23449,8 +23523,11 @@ window.DSCANWorkTransfer={
     try{
       const r=await mergeSameSession(this.pending);
       this.close();
-      const msg=`안전병합 완료 · 반영 ${r.applied}개 · 사진 ${r.photoAdded}장${r.conflicts.length?` · 충돌 ${r.conflicts.length}건(현재값 유지)`:''}`;
-      window.showDscanToast?.(msg,'success');
+      const msg=r.conflicts.length
+        ?`안전병합 완료 · 비충돌 반영 ${r.applied}개 · 사진 ${r.photoAdded}장 · 충돌 ${r.conflicts.length}건은 현재값 보존/ZIP값 보류`
+        :`안전병합 완료 · 반영 ${r.applied}개 · 사진 ${r.photoAdded}장 · 충돌 없음`;
+      try{if(r.conflicts.length&&typeof log==='function')log('안전병합 보류 필드: '+r.conflicts.join(' / '));}catch(e){}
+      window.showDscanToast?.(msg,r.conflicts.length?'warning':'success');
     }catch(e){alert(e.message)}
   },
   async restoreSeparate(){
