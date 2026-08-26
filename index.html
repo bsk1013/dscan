@@ -6350,9 +6350,62 @@ body:has(#tab-home.active) .topbar-shell{
 .dscan-work-transfer-options button{min-height:96px!important;padding:13px!important;text-align:left!important;display:flex!important;flex-direction:column!important;align-items:flex-start!important;justify-content:center!important}
 .dscan-work-transfer-options button.recommended{border-color:#8fb4e1!important;background:#eef6ff!important}
 .dscan-work-transfer-options strong{font-size:11px;color:#294d77}.dscan-work-transfer-options span{margin-top:6px;font-size:8.5px;line-height:1.45;color:#7b8b9b}
-.dscan-work-transfer-conflicts{display:none;margin-top:12px;padding:10px 12px;border-radius:10px;background:#fff8eb;border:1px solid #edd4a7;color:#855f26;font-size:9px;line-height:1.55;white-space:pre-wrap}
-.dscan-work-transfer-conflicts.show{display:block}.dscan-work-transfer-foot{display:flex;justify-content:flex-end;margin-top:14px}
-@media(max-width:720px){.dscan-work-transfer-options{grid-template-columns:1fr}}
+.dscan-work-transfer-conflicts{display:none;margin-top:12px;padding:12px;border-radius:12px;background:#fffaf0;border:1px solid #e8c98e;color:#6f5426;font-size:9px;line-height:1.55}
+.dscan-work-transfer-conflicts.show{display:block}
+.dscan-conflict-summary{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding-bottom:9px;margin-bottom:9px;border-bottom:1px solid #ecd9b5}
+.dscan-conflict-summary b{display:block;color:#744f17;font-size:10px}.dscan-conflict-summary span{display:block;margin-top:3px;color:#8b724a;font-size:8.5px}
+.dscan-conflict-count{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:25px;padding:0 8px;border-radius:999px;background:#f3dfb8;color:#744f17;font-size:9px;font-weight:900}
+.dscan-conflict-list{display:flex;flex-direction:column;gap:8px;max-height:46vh;overflow:auto;padding-right:2px}
+.dscan-conflict-card{padding:10px;border:1px solid #ead7b4;border-radius:10px;background:#fff}
+.dscan-conflict-card.resolved{opacity:.62;background:#f8f9fb;border-color:#dce2e9}
+.dscan-conflict-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:7px}
+.dscan-conflict-rowtitle{min-width:0;color:#314b68;font-size:9px;font-weight:900}.dscan-conflict-rowtitle small{display:block;margin-top:2px;color:#8290a0;font-size:8px;font-weight:650}
+.dscan-conflict-field{flex:0 0 auto;padding:3px 7px;border-radius:999px;background:#eef4fb;border:1px solid #d5e1ee;color:#486786;font-size:7.8px;font-weight:900}
+.dscan-conflict-values{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.dscan-conflict-value{min-width:0;padding:8px;border:1px solid #e2e7ed;border-radius:8px;background:#fafbfc}
+.dscan-conflict-value.zip{background:#f3f8ff;border-color:#cfe0f4}
+.dscan-conflict-value b{display:block;margin-bottom:4px;color:#708094;font-size:7.5px}.dscan-conflict-value pre{margin:0!important;padding:0!important;border:0!important;background:transparent!important;color:#34465a!important;font-family:inherit!important;font-size:8.5px!important;line-height:1.45!important;max-height:90px;overflow:auto;white-space:pre-wrap;word-break:break-word}
+.dscan-conflict-actions{display:flex;justify-content:flex-end;gap:6px;margin-top:8px}.dscan-conflict-actions button{min-height:30px!important;padding:5px 9px!important;font-size:8.5px!important}
+.dscan-conflict-actions .use-zip{background:#eef6ff!important;border-color:#a9c8e9!important;color:#2e639a!important}.dscan-conflict-actions .keep-current{background:#fff!important;color:#607085!important}
+.dscan-conflict-resolution{display:none;margin-top:7px;padding:6px 8px;border-radius:7px;background:#f1f4f7;color:#66788b;font-size:8px;font-weight:800}.dscan-conflict-card.resolved .dscan-conflict-resolution{display:block}
+.dscan-conflict-progress{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;color:#73869a;font-size:8.5px;font-weight:800}
+.dscan-conflict-progress b{color:#315c8d;font-size:9px}
+.dscan-conflict-card.active-review{border-color:#bfd3ea;box-shadow:0 5px 16px rgba(39,97,164,.08)}
+.dscan-conflict-card.resolved{opacity:1;background:#f8fafc;border-color:#dce4ec}
+.dscan-conflict-resolution{display:none!important}
+.dscan-conflict-decision{display:none;align-items:center;justify-content:space-between;gap:8px;margin-top:8px;padding:8px 9px;border-radius:8px;background:#eef7f1;color:#3d7051;font-size:8.5px;font-weight:900}
+.dscan-conflict-card.resolved .dscan-conflict-decision{display:flex}
+.dscan-conflict-decision .undo-choice{min-height:28px!important;padding:4px 8px!important;background:#fff!important;border-color:#cbd8d0!important;color:#4e6f59!important;font-size:8px!important}
+.dscan-conflict-nav{display:flex;justify-content:flex-end;gap:6px;margin-top:9px}
+.dscan-conflict-nav button{min-height:31px!important;padding:5px 11px!important;font-size:8.5px!important;font-weight:900!important}
+.dscan-conflict-nav .next-review{background:#315f92!important;border-color:#315f92!important;color:#fff!important}
+.dscan-conflict-nav .finish-review{background:#2f6f4d!important;border-color:#2f6f4d!important;color:#fff!important}
+
+/* ===== v4.6.25 ZIP conflict review: summary-first + guarded bulk choice ===== */
+.dscan-conflict-overview-actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin:9px 0}
+.dscan-conflict-overview-actions button{min-height:34px!important;padding:6px 9px!important;font-size:8.5px!important;font-weight:900!important}
+.dscan-conflict-overview-actions .bulk-keep{background:#fff!important;color:#607085!important}
+.dscan-conflict-overview-actions .bulk-zip{background:#eef6ff!important;border-color:#a9c8e9!important;color:#2e639a!important}
+.dscan-conflict-overview-actions .review-one{background:#315f92!important;border-color:#315f92!important;color:#fff!important}
+.dscan-conflict-groups{display:flex;flex-wrap:wrap;gap:5px;margin:0 0 8px}
+.dscan-conflict-group-chip{display:inline-flex;align-items:center;gap:4px;padding:4px 7px;border:1px solid #d9e2ec;border-radius:999px;background:#f8fafc;color:#52677e;font-size:7.8px;font-weight:850}
+.dscan-conflict-overview-list{display:flex;flex-direction:column;gap:5px;max-height:31vh;overflow:auto;padding-right:2px}
+.dscan-conflict-overview-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;padding:8px 9px;border:1px solid #e1e6ec;border-radius:9px;background:#fff}
+.dscan-conflict-overview-row.resolved{background:#f7f9fb;border-color:#e1e6ec;opacity:.78}
+.dscan-conflict-overview-title{min-width:0;color:#344b63;font-size:8.7px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dscan-conflict-overview-title small{display:block;margin-top:2px;color:#8290a0;font-size:7.7px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dscan-conflict-overview-row button{min-height:28px!important;padding:4px 8px!important;font-size:8px!important;white-space:nowrap}
+.dscan-conflict-overview-status{display:inline-flex;align-items:center;justify-content:center;padding:3px 7px;border-radius:999px;background:#edf2f7;color:#63768a;font-size:7.5px;font-weight:900;white-space:nowrap}
+.dscan-conflict-overview-status.zip{background:#eaf4ff;color:#2e639a}.dscan-conflict-overview-status.current{background:#eef7f1;color:#3d7051}
+.dscan-conflict-bulk-result{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:9px 0;padding:9px 10px;border:1px solid #cde2d4;border-radius:9px;background:#eef8f1;color:#37694b;font-size:8.5px;font-weight:900}
+.dscan-conflict-bulk-result button{min-height:29px!important;padding:4px 8px!important;font-size:8px!important;background:#fff!important;border-color:#c6d8cc!important;color:#4d7059!important}
+.dscan-conflict-summary-footer{display:flex;justify-content:flex-end;gap:6px;margin-top:9px}
+.dscan-conflict-summary-footer button{min-height:31px!important;padding:5px 11px!important;font-size:8.5px!important;font-weight:900!important}
+.dscan-conflict-summary-footer .finish-review{background:#2f6f4d!important;border-color:#2f6f4d!important;color:#fff!important}
+.dscan-conflict-back{display:flex;justify-content:flex-start;margin-bottom:7px}.dscan-conflict-back button{min-height:28px!important;padding:4px 8px!important;font-size:8px!important}
+@media(max-width:720px){.dscan-conflict-overview-actions{grid-template-columns:1fr}.dscan-conflict-overview-list{max-height:28vh}.dscan-conflict-overview-row{grid-template-columns:minmax(0,1fr) auto}}
+.dscan-work-transfer-foot{display:flex;justify-content:flex-end;margin-top:14px}
+@media(max-width:720px){.dscan-work-transfer-options{grid-template-columns:1fr}.dscan-conflict-values{grid-template-columns:1fr}.dscan-conflict-list{max-height:42vh}}
 
 /* Briefing relationship-law disclosure */
 #tab-briefing .dscan-law-detail-brief{margin-top:7px!important}
@@ -7868,7 +7921,7 @@ body:not(.dscan-audit-active) #dscanAuditScrollJump{display:none!important}
     </div>
     <div class="dscan-work-transfer-rule">
       <b>안전 병합 규칙</b>
-      <span>같은 사업장·파트·기술지원 기간만 병합 · 서로 다른 row는 그대로 추가 · 같은 row는 비충돌 필드만 병합 · 양쪽이 같은 필드를 다르게 수정한 경우 현재값을 보존하고 ZIP 값은 보류 · 사진은 합집합 · 관계법령도 동일한 3-way 규칙 적용</span>
+      <span>같은 사업장·파트·기술지원 기간만 병합 · 서로 다른 항목은 그대로 추가 · 같은 항목에서 겹치지 않는 내용은 자동 병합 · 서로 다른 내용만 하나씩 확인 · 선택 전에는 지금 작성된 내용을 유지 · 사진은 합집합</span>
     </div>
     <div class="dscan-work-transfer-options">
       <button type="button" class="recommended" id="dscanWorkMergeBtn" onclick="DSCANWorkTransfer.merge()">
@@ -23417,8 +23470,15 @@ async function mergeSameSession(bundle){
   const cBase=baselineMap(s.initialRows||[]);
   const iBase=baselineMap(bundle.session?.initialRows||[]);
   const curMap=new Map();current.forEach((r,i)=>curMap.set(rowIdentity(r,i),{r,i}));
-  let applied=0,conflicts=[],newRows=0;
+  let applied=0,conflicts=[],conflictDetails=[],newRows=0;
   const incomingToCurrent=new Map();
+  const addConflict=(detail)=>{
+    const dedupeKey=`${detail.rowIndex}|${detail.fieldPath}`;
+    if(conflictDetails.some(x=>x.dedupeKey===dedupeKey))return;
+    const id=`C${conflictDetails.length+1}`;
+    conflictDetails.push({...detail,id,dedupeKey,resolution:''});
+    conflicts.push(`${detail.rowKey} · ${detail.fieldLabel||detail.fieldPath}`);
+  };
 
   incoming.forEach((ir,ii)=>{
     const key=rowIdentity(ir,ii), hit=curMap.get(key);
@@ -23439,7 +23499,15 @@ async function mergeSameSession(bundle){
         else if(!blank(cv)&&!blank(iv)&&!eq(cv,iv))conflict=true;
       }
       if(take){cr[field]=deep(iv);applied++}
-      else if(conflict)conflicts.push(`${key} · ${field}`);
+      else if(conflict){
+        addConflict({
+          rowKey:key,rowIndex:hit.i,incomingIndex:ii,
+          rowNo:String(cr?.no??ir?.no??hit.i+1),
+          rowTitle:String(cr?.subCategory||cr?.title||ir?.subCategory||ir?.title||''),
+          fieldPath:field,fieldLabel:field,
+          currentValue:deep(cv),zipValue:deep(iv)
+        });
+      }
     });
 
     /* User extra columns: current wins conflicts, ZIP fills blanks. */
@@ -23448,7 +23516,15 @@ async function mergeSameSession(bundle){
       Object.entries(ir.extras).forEach(([k,v])=>{
         if(blank(v))return;
         if(blank(cr.extras[k])){cr.extras[k]=deep(v);applied++}
-        else if(!eq(cr.extras[k],v))conflicts.push(`${key} · 사용자열:${k}`);
+        else if(!eq(cr.extras[k],v)){
+          addConflict({
+            rowKey:key,rowIndex:hit.i,incomingIndex:ii,
+            rowNo:String(cr?.no??ir?.no??hit.i+1),
+            rowTitle:String(cr?.subCategory||cr?.title||ir?.subCategory||ir?.title||''),
+            fieldPath:`extras:${k}`,fieldLabel:`사용자열:${k}`,
+            currentValue:deep(cr.extras[k]),zipValue:deep(v)
+          });
+        }
       });
     }
   });
@@ -23496,15 +23572,223 @@ async function mergeSameSession(bundle){
     throw new Error('데이터 병합은 완료됐지만 사진 저장에 실패했습니다. 다시 시도해주세요.');
   }
 
-  return{applied,conflicts:[...new Set(conflicts)],newRows,photoAdded};
+  return{applied,conflicts:[...new Set(conflicts)],conflictDetails,newRows,photoAdded};
 }
 
 window.DSCANWorkTransfer={
   pending:null,
+  lastMerge:null,
+  reviewIndex:0,
+  conflictView:'summary',
+  bulkUndoIds:[],
+  fieldLabels:{
+    criteria:'점검기준',mainText:'부적합사항(주요내용)',finding:'발견사항',earnedScore:'평가점수',
+    evaluationScore:'평가점수',scoreValue:'점수값',evaluationStatus:'평가상태',resultCategory:'결과분류',
+    result:'결과',riskType:'위험유형',photoTag:'사진태그',briefingIncluded:'강평 포함',
+    sourceLawText:'관계법령 텍스트',relatedLaws:'관계법령'
+  },
+  escapeHtml(v){return String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]))},
+  valueText(v){
+    if(v===undefined||v===null||v==='')return '(빈값)';
+    if(typeof v==='boolean')return v?'체크':'미체크';
+    if(Array.isArray(v)){
+      if(!v.length)return '(없음)';
+      return v.map(x=>typeof x==='object'?(x?.primaryLabel||x?.primaryId||JSON.stringify(x)):String(x)).join('\n');
+    }
+    if(typeof v==='object'){
+      try{return JSON.stringify(v,null,2)}catch(e){return String(v)}
+    }
+    return String(v);
+  },
+  labelFor(path,label){
+    if(String(path).startsWith('extras:'))return label||String(path).slice(7);
+    return this.fieldLabels[path]||label||path;
+  },
+  resetConflictUi(){
+    this.lastMerge=null;this.reviewIndex=0;this.conflictView='summary';this.bulkUndoIds=[];
+    const box=document.getElementById('dscanWorkTransferConflicts');if(box){box.innerHTML='';box.classList.remove('show')}
+    const merge=document.getElementById('dscanWorkMergeBtn');if(merge)merge.disabled=false;
+    const sep=document.getElementById('dscanWorkSeparateBtn');if(sep)sep.disabled=false;
+    const foot=document.querySelector('#dscanWorkTransferOverlay .dscan-work-transfer-foot button');if(foot)foot.textContent='취소';
+  },
+  renderConflictDetails(){
+    if(this.conflictView==='detail')return this.renderConflictItem();
+    return this.renderConflictSummary();
+  },
+  renderConflictSummary(){
+    const box=document.getElementById('dscanWorkTransferConflicts');if(!box)return;
+    const details=this.lastMerge?.conflictDetails||[];
+    if(!details.length){box.innerHTML='';box.classList.remove('show');return}
+    const unresolved=details.filter(x=>!x.resolution).length;
+    const groups={};
+    details.forEach(d=>{const k=this.labelFor(d.fieldPath,d.fieldLabel);groups[k]=(groups[k]||0)+1});
+    const chips=Object.entries(groups).map(([k,n])=>`<span class="dscan-conflict-group-chip">${this.escapeHtml(k)} <b>${n}</b></span>`).join('');
+    const list=details.map((d,i)=>{
+      const label=this.escapeHtml(this.labelFor(d.fieldPath,d.fieldLabel));
+      const title=this.escapeHtml(d.rowTitle||'체크리스트 항목');
+      const no=this.escapeHtml(d.rowNo||'-');
+      const status=d.resolution==='zip'?'<span class="dscan-conflict-overview-status zip">가져온 내용 사용</span>':d.resolution==='current'?'<span class="dscan-conflict-overview-status current">그대로 유지</span>':`<button type="button" onclick="DSCANWorkTransfer.openConflict('${this.escapeHtml(d.id)}')">건별 확인</button>`;
+      const cur=this.escapeHtml(this.valueText(d.currentValue)).replace(/\s+/g,' ').slice(0,62);
+      const zip=this.escapeHtml(this.valueText(d.zipValue)).replace(/\s+/g,' ').slice(0,62);
+      return `<div class="dscan-conflict-overview-row${d.resolution?' resolved':''}"><div class="dscan-conflict-overview-title">${no}번 · ${title} · ${label}<small>현재: ${cur}　→　가져옴: ${zip}</small></div>${status}</div>`;
+    }).join('');
+    const bulkUndo=(this.bulkUndoIds||[]).length?`<div class="dscan-conflict-bulk-result"><span>✓ 가져온 내용 ${(this.bulkUndoIds||[]).length}건으로 변경했습니다.</span><button type="button" onclick="DSCANWorkTransfer.undoBulkZip()">전체 되돌리기</button></div>`:'';
+    const actions=unresolved?`<div class="dscan-conflict-overview-actions"><button type="button" class="bulk-keep" onclick="DSCANWorkTransfer.keepAllConflicts()">모두 그대로 두기</button><button type="button" class="bulk-zip" onclick="DSCANWorkTransfer.applyAllZipConflicts()">모두 가져온 내용으로 바꾸기</button><button type="button" class="review-one" onclick="DSCANWorkTransfer.startConflictReview()">하나씩 확인하기</button></div>`:'';
+    const footer=!unresolved?`<div class="dscan-conflict-summary-footer"><button type="button" class="finish-review" onclick="DSCANWorkTransfer.finishConflictReview()">검토 완료</button></div>`:'';
+    box.innerHTML=`<div class="dscan-conflict-summary"><div><b>확인이 필요한 내용 ${details.length}건</b><span>같은 항목에 서로 다른 내용이 있습니다. 비충돌 내용과 사진은 이미 병합되었습니다. 아래 항목만 결정하면 됩니다.</span></div><span class="dscan-conflict-count">${unresolved}건 남음</span></div><div class="dscan-conflict-groups">${chips}</div>${bulkUndo}${actions}<div class="dscan-conflict-overview-list">${list}</div>${footer}`;
+    box.classList.add('show');
+  },
+  renderConflictItem(){
+    const box=document.getElementById('dscanWorkTransferConflicts');if(!box)return;
+    const details=this.lastMerge?.conflictDetails||[];
+    if(!details.length){box.innerHTML='';box.classList.remove('show');return}
+    if(!Number.isInteger(this.reviewIndex)||this.reviewIndex<0)this.reviewIndex=0;
+    if(this.reviewIndex>=details.length)this.reviewIndex=details.length-1;
+    const d=details[this.reviewIndex];
+    const unresolved=details.filter(x=>!x.resolution).length;
+    const label=this.escapeHtml(this.labelFor(d.fieldPath,d.fieldLabel));
+    const title=this.escapeHtml(d.rowTitle||'체크리스트 항목');
+    const no=this.escapeHtml(d.rowNo||'-');
+    const cur=this.escapeHtml(this.valueText(d.currentValue));
+    const zip=this.escapeHtml(this.valueText(d.zipValue));
+    const resolved=d.resolution?' resolved':'';
+    const changed=d.resolution==='zip';
+    const decision=changed?'✓ 가져온 내용으로 변경했습니다.':d.resolution==='current'?'✓ 지금 작성된 내용을 그대로 유지합니다.':'';
+    const undo=changed?`<button type="button" class="undo-choice" onclick="DSCANWorkTransfer.undoConflict('${this.escapeHtml(d.id)}')">되돌리기</button>`:'';
+    const nav=d.resolution?`<div class="dscan-conflict-nav"><button type="button" class="next-review" onclick="DSCANWorkTransfer.nextConflict()">${unresolved?'다음 항목 검토 →':'전체 요약으로 돌아가기'}</button></div>`:'';
+    box.innerHTML=`<div class="dscan-conflict-summary"><div><b>확인이 필요한 내용 ${details.length}건</b><span>선택 전에는 지금 작성된 내용이 그대로 유지됩니다.</span></div><span class="dscan-conflict-count">${unresolved}건 남음</span></div><div class="dscan-conflict-back"><button type="button" onclick="DSCANWorkTransfer.showConflictSummary()">← 전체 요약</button></div><div class="dscan-conflict-progress"><span><b>${this.reviewIndex+1}</b> / ${details.length}</span><span>겹치는 내용 확인</span></div><div class="dscan-conflict-list"><div class="dscan-conflict-card active-review${resolved}" data-conflict-id="${this.escapeHtml(d.id)}"><div class="dscan-conflict-head"><div class="dscan-conflict-rowtitle">${no}번 · ${title}<small>${this.escapeHtml(d.rowKey)}</small></div><span class="dscan-conflict-field">${label}</span></div><div class="dscan-conflict-values"><div class="dscan-conflict-value"><b>지금 작성된 내용</b><pre>${cur}</pre></div><div class="dscan-conflict-value zip"><b>가져온 내용</b><pre>${zip}</pre></div></div>${d.resolution?'':`<div class="dscan-conflict-actions"><button type="button" class="keep-current" onclick="DSCANWorkTransfer.keepConflict('${this.escapeHtml(d.id)}')">그대로 두기</button><button type="button" class="use-zip" onclick="DSCANWorkTransfer.applyZipConflict('${this.escapeHtml(d.id)}')">이 내용으로 바꾸기</button></div>`}<div class="dscan-conflict-decision"><span>${this.escapeHtml(decision)}</span>${undo}</div>${nav}</div></div>`;
+    box.classList.add('show');
+  },
+  showConflictSummary(){this.conflictView='summary';this.renderConflictSummary()},
+  openConflict(id){
+    const details=this.lastMerge?.conflictDetails||[];const idx=details.findIndex(x=>x.id===id);if(idx<0)return;
+    this.reviewIndex=idx;this.conflictView='detail';this.renderConflictItem();
+  },
+  startConflictReview(){
+    const details=this.lastMerge?.conflictDetails||[];if(!details.length)return;
+    const idx=details.findIndex(x=>!x.resolution);this.reviewIndex=idx>=0?idx:0;this.conflictView='detail';this.renderConflictItem();
+  },
+  async persistConflictBatch(details,target){
+    const list=(details||[]).filter(Boolean);if(!list.length)return true;
+    const current=(typeof rows!=='undefined'&&Array.isArray(rows))?rows:[];
+    const backups=[];const touched=new Set();
+    try{
+      for(const d of list){
+        let idx=Number(d.rowIndex);
+        if(!Number.isInteger(idx)||!current[idx]||rowIdentity(current[idx],idx)!==d.rowKey)idx=current.findIndex((r,i)=>rowIdentity(r,i)===d.rowKey);
+        if(idx<0||!current[idx])throw new Error(`${d.rowNo||'-'}번 항목을 현재 세션에서 찾을 수 없습니다.`);
+        const r=current[idx],isExtra=String(d.fieldPath).startsWith('extras:'),key=isExtra?String(d.fieldPath).slice(7):d.fieldPath;
+        const oldValue=isExtra?deep(r.extras?.[key]):deep(r[key]);backups.push({d,idx,isExtra,key,oldValue});
+        const newValue=deep(target==='zip'?d.zipValue:d.currentValue);
+        if(isExtra){r.extras=r.extras&&typeof r.extras==='object'?r.extras:{};r.extras[key]=newValue}
+        else{r[key]=newValue;try{window.DSCAN_RuntimeJournal?.writeFields?.(r,idx,{[key]:newValue})}catch(e){console.error('[DSCAN bulk conflict journal]',e)}}
+        touched.add(idx);
+      }
+      touched.forEach(idx=>{try{syncDerived(current[idx])}catch(e){}});
+      const ss=active();if(!ss?.id)throw new Error('현재 세션이 없습니다.');
+      ss.runtimeRows=deep(current);if(ss.locked===true||ss.status==='완료'||ss.status==='완료·LOCK'){ss.completedRows=deep(current);ss.status='완료';ss.locked=true}
+      ss.lastSavedAt=new Date().toISOString();write(SESSION_KEY,ss);window.DSCAN_INSPECTION_SESSION=ss;writeSessionToHistory(ss);
+      try{window.persistCurrentInspectionSnapshot?.()}catch(e){console.error('[DSCAN bulk conflict persist]',e);throw e}
+      try{window.renderRows?.();window.refreshScoreSummary?.();window.rebuildBriefingItems?.();window.renderBriefingList?.();window.renderOperationalBriefingIntro?.()}catch(e){console.error(e)}
+      return true;
+    }catch(err){
+      for(const b of backups.reverse()){
+        const r=current[b.idx];if(!r)continue;
+        if(b.isExtra){r.extras=r.extras&&typeof r.extras==='object'?r.extras:{};r.extras[b.key]=deep(b.oldValue)}
+        else{r[b.key]=deep(b.oldValue);try{window.DSCAN_RuntimeJournal?.writeFields?.(r,b.idx,{[b.key]:b.oldValue})}catch(e){}}
+        try{syncDerived(r)}catch(e){}
+      }
+      try{const ss=active();if(ss?.id){ss.runtimeRows=deep(current);if(ss.locked===true||ss.status==='완료'||ss.status==='완료·LOCK')ss.completedRows=deep(current);ss.lastSavedAt=new Date().toISOString();write(SESSION_KEY,ss);window.DSCAN_INSPECTION_SESSION=ss;writeSessionToHistory(ss);window.persistCurrentInspectionSnapshot?.()}}catch(e){console.error('[DSCAN bulk rollback]',e)}
+      throw err;
+    }
+  },
+  keepAllConflicts(){
+    const details=this.lastMerge?.conflictDetails||[];const targets=details.filter(x=>!x.resolution);if(!targets.length)return;
+    targets.forEach(d=>d.resolution='current');this.bulkUndoIds=[];this.conflictView='summary';this.renderConflictSummary();window.showDscanToast?.(`지금 작성된 내용 ${targets.length}건을 그대로 유지합니다.`,'success');
+  },
+  async applyAllZipConflicts(){
+    const details=this.lastMerge?.conflictDetails||[];const targets=details.filter(x=>!x.resolution);if(!targets.length)return;
+    const ok=confirm(`가져온 내용 ${targets.length}건으로 현재 작성 내용을 변경하시겠습니까?\n\n변경 후에도 「전체 되돌리기」로 즉시 되돌릴 수 있습니다.`);if(!ok)return;
+    try{await this.persistConflictBatch(targets,'zip');targets.forEach(d=>d.resolution='zip');this.bulkUndoIds=targets.map(d=>d.id);this.conflictView='summary';this.renderConflictSummary();window.showDscanToast?.(`가져온 내용 ${targets.length}건으로 변경했습니다.`,'success')}catch(e){alert('일괄 변경 오류: '+e.message)}
+  },
+  async undoBulkZip(){
+    const ids=new Set(this.bulkUndoIds||[]);const details=(this.lastMerge?.conflictDetails||[]).filter(d=>ids.has(d.id)&&d.resolution==='zip');if(!details.length){this.bulkUndoIds=[];this.renderConflictSummary();return}
+    try{await this.persistConflictBatch(details,'current');details.forEach(d=>d.resolution='');this.bulkUndoIds=[];this.conflictView='summary';this.renderConflictSummary();window.showDscanToast?.('일괄 변경 전 내용으로 모두 되돌렸습니다.','success')}catch(e){alert('전체 되돌리기 오류: '+e.message)}
+  },
+  async persistConflictChoice(detail,useZip){
+    if(!detail)return false;
+    const current=(typeof rows!=='undefined'&&Array.isArray(rows))?rows:[];
+    let idx=Number(detail.rowIndex);
+    if(!Number.isInteger(idx)||!current[idx]||rowIdentity(current[idx],idx)!==detail.rowKey){
+      idx=current.findIndex((r,i)=>rowIdentity(r,i)===detail.rowKey);
+    }
+    if(idx<0||!current[idx])throw new Error('충돌 항목을 현재 세션에서 찾을 수 없습니다. 다시 ZIP을 불러와주세요.');
+    const r=current[idx];
+    if(useZip){
+      if(String(detail.fieldPath).startsWith('extras:')){
+        const k=String(detail.fieldPath).slice(7);r.extras=r.extras&&typeof r.extras==='object'?r.extras:{};r.extras[k]=deep(detail.zipValue);
+      }else{
+        r[detail.fieldPath]=deep(detail.zipValue);
+        try{window.DSCAN_RuntimeJournal?.writeFields?.(r,idx,{[detail.fieldPath]:detail.zipValue})}catch(e){console.error('[DSCAN conflict journal]',e)}
+      }
+      try{syncDerived(r)}catch(e){}
+    }
+    const s=active();if(!s?.id)throw new Error('현재 세션이 없습니다.');
+    s.runtimeRows=deep(current);
+    if(s.locked===true||s.status==='완료'||s.status==='완료·LOCK'){
+      s.completedRows=deep(current);s.status='완료';s.locked=true;
+    }
+    s.lastSavedAt=new Date().toISOString();
+    write(SESSION_KEY,s);window.DSCAN_INSPECTION_SESSION=s;writeSessionToHistory(s);
+    try{window.persistCurrentInspectionSnapshot?.()}catch(e){console.error('[DSCAN conflict persist]',e)}
+    try{window.renderRows?.();window.refreshScoreSummary?.();window.rebuildBriefingItems?.();window.renderBriefingList?.();window.renderOperationalBriefingIntro?.()}catch(e){console.error(e)}
+    return true;
+  },
+  async applyZipConflict(id){
+    const d=this.lastMerge?.conflictDetails?.find(x=>x.id===id);if(!d||d.resolution)return;
+    try{await this.persistConflictChoice(d,true);d.resolution='zip';this.renderConflictDetails();window.showDscanToast?.('가져온 내용으로 변경했습니다.','success')}catch(e){alert('내용 변경 오류: '+e.message)}
+  },
+  keepConflict(id){
+    const d=this.lastMerge?.conflictDetails?.find(x=>x.id===id);if(!d||d.resolution)return;
+    d.resolution='current';this.renderConflictDetails();
+  },
+  async undoConflict(id){
+    const d=this.lastMerge?.conflictDetails?.find(x=>x.id===id);if(!d||d.resolution!=='zip')return;
+    try{
+      const current=(typeof rows!=='undefined'&&Array.isArray(rows))?rows:[];
+      let idx=Number(d.rowIndex);
+      if(!Number.isInteger(idx)||!current[idx]||rowIdentity(current[idx],idx)!==d.rowKey)idx=current.findIndex((r,i)=>rowIdentity(r,i)===d.rowKey);
+      if(idx<0||!current[idx])throw new Error('검토 항목을 현재 세션에서 찾을 수 없습니다.');
+      const r=current[idx];
+      if(String(d.fieldPath).startsWith('extras:')){const k=String(d.fieldPath).slice(7);r.extras=r.extras&&typeof r.extras==='object'?r.extras:{};r.extras[k]=deep(d.currentValue)}
+      else{r[d.fieldPath]=deep(d.currentValue);try{window.DSCAN_RuntimeJournal?.writeFields?.(r,idx,{[d.fieldPath]:d.currentValue})}catch(e){console.error('[DSCAN conflict undo journal]',e)}}
+      try{syncDerived(r)}catch(e){}
+      const ss=active();if(!ss?.id)throw new Error('현재 세션이 없습니다.');
+      ss.runtimeRows=deep(current);if(ss.locked===true||ss.status==='완료'||ss.status==='완료·LOCK'){ss.completedRows=deep(current);ss.status='완료';ss.locked=true}
+      ss.lastSavedAt=new Date().toISOString();write(SESSION_KEY,ss);window.DSCAN_INSPECTION_SESSION=ss;writeSessionToHistory(ss);
+      try{window.persistCurrentInspectionSnapshot?.()}catch(e){console.error('[DSCAN conflict undo persist]',e)}
+      try{window.renderRows?.();window.refreshScoreSummary?.();window.rebuildBriefingItems?.();window.renderBriefingList?.();window.renderOperationalBriefingIntro?.()}catch(e){console.error(e)}
+      d.resolution=null;this.renderConflictDetails();window.showDscanToast?.('변경 전 내용으로 되돌렸습니다.','success');
+    }catch(e){alert('되돌리기 오류: '+e.message)}
+  },
+  nextConflict(){
+    const details=this.lastMerge?.conflictDetails||[];if(!details.length)return;
+    if(!details[this.reviewIndex]?.resolution)return;
+    let idx=details.findIndex((x,i)=>i>this.reviewIndex&&!x.resolution);
+    if(idx<0)idx=details.findIndex(x=>!x.resolution);
+    if(idx>=0){this.reviewIndex=idx;this.conflictView='detail';this.renderConflictItem();return}
+    this.conflictView='summary';this.renderConflictSummary();
+  },
+  finishConflictReview(){
+    const details=this.lastMerge?.conflictDetails||[];
+    const unresolved=details.filter(x=>!x.resolution).length;
+    if(unresolved){window.showDscanToast?.(`아직 확인하지 않은 내용이 ${unresolved}건 있습니다.`,'warning');return}
+    window.showDscanToast?.('겹치는 내용 검토를 완료했습니다.','success');this.close();
+  },
   async handleFile(event){
     const file=event.target.files?.[0];event.target.value='';if(!file)return;
     try{
-      const bundle=await readBundle(file);this.pending=bundle;
+      const bundle=await readBundle(file);this.pending=bundle;this.resetConflictUi();this.pending=bundle;
       const a=active(),same=a?.id&&sameSig(a,bundle.session);
       const meta=document.getElementById('dscanWorkTransferMeta');
       if(meta)meta.textContent=`${bundle.session.site||'-'} · ${bundle.session.inspectionStartDate||'-'} · ${bundle.session.checklistProfileName||PROFILE_NAMES[bundle.session.checklistProfile]||'-'} · ${bundle.rows.length}개 항목`;
@@ -23513,21 +23797,26 @@ window.DSCANWorkTransfer={
       if(!a?.id){
         await restoreBundle(bundle);this.pending=null;return;
       }
-      document.getElementById('dscanWorkTransferConflicts')?.classList.remove('show');
       document.getElementById('dscanWorkTransferOverlay')?.classList.add('open');
     }catch(e){console.error(e);alert('작업 ZIP 불러오기 오류: '+e.message)}
   },
-  close(){document.getElementById('dscanWorkTransferOverlay')?.classList.remove('open');this.pending=null},
+  close(){document.getElementById('dscanWorkTransferOverlay')?.classList.remove('open');this.pending=null;this.lastMerge=null;this.reviewIndex=0;this.conflictView='summary';this.bulkUndoIds=[]},
   async merge(){
     if(!this.pending)return;
     try{
       const r=await mergeSameSession(this.pending);
-      this.close();
+      this.lastMerge=r;
       const msg=r.conflicts.length
-        ?`안전병합 완료 · 비충돌 반영 ${r.applied}개 · 사진 ${r.photoAdded}장 · 충돌 ${r.conflicts.length}건은 현재값 보존/ZIP값 보류`
+        ?`안전병합 완료 · 비충돌 반영 ${r.applied}개 · 사진 ${r.photoAdded}장 · 확인이 필요한 내용 ${r.conflicts.length}건`
         :`안전병합 완료 · 반영 ${r.applied}개 · 사진 ${r.photoAdded}장 · 충돌 없음`;
       try{if(r.conflicts.length&&typeof log==='function')log('안전병합 보류 필드: '+r.conflicts.join(' / '));}catch(e){}
       window.showDscanToast?.(msg,r.conflicts.length?'warning':'success');
+      if(r.conflicts.length){
+        const merge=document.getElementById('dscanWorkMergeBtn');if(merge)merge.disabled=true;
+        const sep=document.getElementById('dscanWorkSeparateBtn');if(sep)sep.disabled=true;
+        const foot=document.querySelector('#dscanWorkTransferOverlay .dscan-work-transfer-foot button');if(foot)foot.textContent='나중에 검토';
+        this.renderConflictDetails();
+      }else this.close();
     }catch(e){alert(e.message)}
   },
   async restoreSeparate(){
