@@ -7925,10 +7925,10 @@ body:not(.dscan-audit-active) #dscanAuditScrollJump{display:none!important}
     </div>
     <div class="dscan-work-transfer-options">
       <button type="button" class="recommended" id="dscanWorkMergeBtn" onclick="DSCANWorkTransfer.merge()">
-        <strong>안전 병합</strong><span>PC와 태블릿의 같은 세션 작업을 합칩니다.</span>
+        <strong>같은 세션에 합치기</strong><span>같은 사업장·파트·기간의 PC/태블릿 작업을 안전하게 합칩니다.</span>
       </button>
       <button type="button" id="dscanWorkSeparateBtn" onclick="DSCANWorkTransfer.restoreSeparate()">
-        <strong>별도 세션으로 불러오기</strong><span>현재 작업은 그대로 두고 ZIP을 별도 세션으로 복원합니다.</span>
+        <strong>새 세션으로 가져오기</strong><span>현재 작업과 합치지 않고 ZIP을 독립된 세션으로 복원합니다.</span>
       </button>
     </div>
     <div class="dscan-work-transfer-conflicts" id="dscanWorkTransferConflicts"></div>
@@ -13927,6 +13927,40 @@ body.briefing-mode-active #tab-briefing .viewerStage{
     document.body.style.overflow='hidden';
   }
 
+  function resolveLawRefArticleId(ref){
+    if(!ref)return '';
+    const direct=String(ref.primaryId||ref.articleId||ref.id||'').trim();
+    if(direct && indexById.has(direct))return direct;
+    const wanted=normalize(String(ref.primaryLabel||ref.label||ref.title||ref.primaryText||'').trim());
+    if(!wanted)return '';
+    const articles=Array.isArray(current?.articles)?current.articles:[];
+    const exact=articles.find(a=>normalize(label(a))===wanted);
+    if(exact)return exact.id;
+    const compact=wanted.replace(/\s+/g,'');
+    const loose=articles.find(a=>normalize(label(a)).replace(/\s+/g,'')===compact);
+    return loose?.id||'';
+  }
+
+  function openLawDetailRef(ref){
+    const id=resolveLawRefArticleId(ref);
+    if(id){openLawDetail(id);return true;}
+    /* A manually entered/reference-only law may not exist in LawDB.
+       Still use the same briefing popup shell without mutating LawDB. */
+    const titleText=String(ref?.primaryLabel||ref?.label||ref?.title||ref?.primaryId||'관계법령').trim()||'관계법령';
+    const bodyText=String(ref?.primaryText||ref?.text||ref?.sourceText||'').trim();
+    const overlay=document.getElementById('lawDetailOverlay');
+    const title=document.getElementById('lawDetailTitle');
+    const text=document.getElementById('lawDetailText');
+    const relWrap=document.getElementById('lawDetailRelations');
+    if(title)title.textContent=titleText;
+    if(text)text.textContent=formatLawDetailText(bodyText)||'현재 ZIP/세션에는 이 법령의 조문 본문이 저장되어 있지 않습니다.';
+    if(relWrap)relWrap.textContent='LawDB에서 연결된 조문을 찾지 못했습니다.';
+    try{syncCartoonButton(null);}catch(e){}
+    if(overlay)overlay.classList.add('open');
+    document.body.style.overflow='hidden';
+    return false;
+  }
+
   function closeLawDetail(ev){
     if(ev && ev.target && ev.target.id!=='lawDetailOverlay')return;
     const overlay=document.getElementById('lawDetailOverlay');
@@ -14693,7 +14727,7 @@ body.briefing-mode-active #tab-briefing .viewerStage{
 
   window.SHELegal={
     search,manualSearch,scheduleRowSearch,renderAllRowLawCells,renderRowLawCell,
-    setResultLimit,toggleRowOptions,toggleLawGroupMore,addManualLaw,toggleResult,applyResult,removeLaw,openLawDetail,closeLawDetail,openCartoon,closeCartoon,backToLawDetail,cartoonZoom,cartoonResetZoom,openCartoonSource,openOfficialLaw,officialSearchUrl,
+    setResultLimit,toggleRowOptions,toggleLawGroupMore,addManualLaw,toggleResult,applyResult,removeLaw,openLawDetail,openLawDetailRef,resolveLawRefArticleId,closeLawDetail,openCartoon,closeCartoon,backToLawDetail,cartoonZoom,cartoonResetZoom,openCartoonSource,openOfficialLaw,officialSearchUrl,
     toggleValidationCenter,runValidationQuery,openValidationDetail,openValidationOfficial,setValidationAnswer,removeValidationExpected,runRegression,loadValidationCase,deleteValidationCase,
     loadValidationExamples,exportValidation,importValidation,
     formatRowLaws,exportLawDb,importLawDb,restoreBuiltin,mergeSnapshotForRows,
@@ -17180,11 +17214,11 @@ document.addEventListener('change',function(e){
           const line=document.createElement('div');
           line.className='dscan-brief-law-link';
           line.textContent=label;
-          if(primaryId && !ref?.manual && typeof window.SHELegal?.openLawDetail==='function'){
+          if(typeof window.SHELegal?.openLawDetailRef==='function'){
             line.setAttribute('role','button');
             line.tabIndex=0;
-            line.title='법령 상세보기';
-            const open=()=>window.SHELegal.openLawDetail(primaryId);
+            line.title='선택 법령 팝업 열람';
+            const open=()=>window.SHELegal.openLawDetailRef(ref);
             line.addEventListener('click',open);
             line.addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();open();}});
           }
@@ -23271,7 +23305,17 @@ const active=()=>read(SESSION_KEY,null);
 const hist=()=>{const h=read(HISTORY_KEY,[]);return Array.isArray(h)?h:[]};
 const eq=(a,b)=>JSON.stringify(a??null)===JSON.stringify(b??null);
 const blank=v=>v===null||v===undefined||v===''||(Array.isArray(v)&&!v.length)||(typeof v==='object'&&!Array.isArray(v)&&v&&Object.keys(v).length===0);
-const normalizeProfile=v=>String(v||'').trim();
+const normalizeProfile=v=>{
+  const raw=String(v||'').trim();
+  const key=raw.toLowerCase().replace(/\s+/g,'').replace(/[-_]/g,'');
+  const aliases={
+    'safety':'safety','안전':'safety',
+    'health':'health','보건':'health',
+    'safetycontractor':'safety_contractor','안전(도급)':'safety_contractor','안전도급':'safety_contractor',
+    'healthcontractor':'health_contractor','보건(도급)':'health_contractor','보건도급':'health_contractor'
+  };
+  return aliases[key]||aliases[raw]||raw;
+};
 const canonicalDate=v=>{
   const raw=String(v||'').trim();
   const m=raw.match(/(\d{4})[.\/-]?(\d{1,2})[.\/-]?(\d{1,2})/);
@@ -23284,7 +23328,7 @@ const signature=s=>({
   end:canonicalDate(s?.inspectionEndDate||s?.inspectionStartDate||s?.inspectionDate||''),
   year:String(s?.year||'').trim(),
   half:String(s?.half||'').trim(),
-  profile:normalizeProfile(s?.checklistProfile||s?.profileId)
+  profile:normalizeProfile(s?.checklistProfile||s?.profileId||s?.checklistProfileName||s?.part)
 });
 const sameSig=(a,b)=>{
   const x=signature(a),y=signature(b);
@@ -23321,7 +23365,7 @@ async function readBundle(file){
   }
   if(!session.checklistProfileName)session.checklistProfileName=PROFILE_NAMES[session.checklistProfile]||session.checklistProfile||'';
   if(!session.inspectionStartDate)session.inspectionStartDate=session.inspectionDate||raw.rows?.[0]?.sourceSession?.startDate||'';
-  if(!session.inspectionEndDate)session.inspectionEndDate=session.inspectionStartDate||raw.rows?.[0]?.sourceSession?.endDate||'';
+  if(!session.inspectionEndDate)session.inspectionEndDate=raw.rows?.[0]?.sourceSession?.endDate||session.inspectionStartDate||'';
   if(!session.inspectionDate)session.inspectionDate=session.inspectionStartDate;
   const isFinal=!!(session.locked===true||session.status==='완료'||session.status==='완료·LOCK');
   const canonicalSourceRows=(isFinal&&Array.isArray(session.completedRows)&&session.completedRows.length)?session.completedRows:((Array.isArray(raw.rows)&&raw.rows.length)?raw.rows:((Array.isArray(session.runtimeRows)&&session.runtimeRows.length)?session.runtimeRows:((Array.isArray(session.initialRows)&&session.initialRows.length)?session.initialRows:[])));
@@ -23461,7 +23505,7 @@ function baselineMap(list){
 const MERGE_FIELDS=['criteria','mainText','finding','earnedScore','evaluationScore','scoreValue','evaluationStatus','resultCategory','result','riskType','photoTag','briefingIncluded','sourceLawText','relatedLaws'];
 async function mergeSameSession(bundle){
   const s=active();if(!s?.id)throw new Error('현재 세션이 없습니다.');
-  if(!sameSig(s,bundle.session))throw new Error('안전병합 대상이 아닙니다. 사업장·파트가 다르거나 기술지원 기간이 겹치지 않습니다. 현재 작업을 보호하기 위해 「별도 세션으로 불러오기」를 사용해주세요.');
+  if(!sameSig(s,bundle.session))throw new Error('안전병합 대상이 아닙니다. 사업장·파트가 다르거나 기술지원 기간이 겹치지 않습니다. 현재 작업을 보호하기 위해 「새 세션으로 가져오기」를 사용해주세요.');
 
   try{await window.SHELegal?.mergeSnapshotForRows?.(bundle.lawDbSnapshot,bundle.rows||[])}catch(e){console.error('[DSCAN ZIP LawDB merge]',e)}
 
@@ -23793,7 +23837,12 @@ window.DSCANWorkTransfer={
       const meta=document.getElementById('dscanWorkTransferMeta');
       if(meta)meta.textContent=`${bundle.session.site||'-'} · ${bundle.session.inspectionStartDate||'-'} · ${bundle.session.checklistProfileName||PROFILE_NAMES[bundle.session.checklistProfile]||'-'} · ${bundle.rows.length}개 항목`;
       const merge=document.getElementById('dscanWorkMergeBtn');
-      if(merge){merge.disabled=!same;merge.title=same?'같은 세션을 안전 병합합니다.':'현재 세션과 사업장·시작일·파트가 달라 병합할 수 없습니다.'}
+      if(merge){
+        /* Never make the primary action look dead. merge() performs the authoritative same-session guard. */
+        merge.disabled=false;
+        merge.dataset.compatible=same?'1':'0';
+        merge.title=same?'같은 기술지원 세션으로 확인되었습니다. 안전 병합합니다.':'현재 세션과 ZIP의 사업장·파트·기간을 다시 확인합니다. 다른 세션이면 병합하지 않고 안내합니다.';
+      }
       if(!a?.id){
         await restoreBundle(bundle);this.pending=null;return;
       }
@@ -23804,6 +23853,12 @@ window.DSCANWorkTransfer={
   async merge(){
     if(!this.pending)return;
     try{
+      const cur=active();
+      if(!cur?.id)throw new Error('현재 기술지원 세션이 없습니다. ZIP을 새 세션으로 가져와주세요.');
+      if(!sameSig(cur,this.pending.session)){
+        const a=signature(cur),b=signature(this.pending.session);
+        throw new Error(`안전 병합 대상이 아닙니다.\n\n현재: ${a.site||'-'} · ${a.profile||'-'} · ${a.start||'-'}~${a.end||'-'}\nZIP: ${b.site||'-'} · ${b.profile||'-'} · ${b.start||'-'}~${b.end||'-'}\n\n서로 다른 기술지원이면 「새 세션으로 가져오기」를 사용해주세요.`);
+      }
       const r=await mergeSameSession(this.pending);
       this.lastMerge=r;
       const msg=r.conflicts.length
