@@ -6869,14 +6869,32 @@ body:not(.dscan-audit-active) #dscanAuditScrollJump{display:none!important}
 </style>
 
 <style id="dscan-v4628-field-ux-visual-guard">
-/* v4.6.31 — photo controls/briefing readability canonical refinement. Logic-neutral visual scope. */
-.dscan-linked-photo{position:relative;padding-bottom:14px!important;min-width:58px}
+/* v4.6.32 — linked-photo order controls: button fallback + handle drag. Canonical visual scope. */
+.dscan-linked-photo{position:relative;padding-bottom:14px!important;min-width:58px;touch-action:auto}
 .dscan-linked-photo .dscan-photo-rotate-btn,.dscan-linked-photo .dscan-photo-order-btn{
   position:absolute!important;bottom:2px!important;width:18px!important;height:18px!important;min-width:18px!important;min-height:18px!important;
   padding:0!important;border-radius:5px!important;font-size:11px!important;line-height:1!important;background:rgba(255,255,255,.96)!important;color:#284b72!important;border:1px solid #b9c9dc!important;z-index:8!important;box-shadow:0 1px 4px rgba(18,42,70,.14)!important
 }
 .dscan-linked-photo .dscan-photo-order-btn.prev{left:1px!important}.dscan-linked-photo .dscan-photo-rotate-btn{left:20px!important}.dscan-linked-photo .dscan-photo-order-btn.next{left:39px!important}
 .dscan-linked-photo .dscan-photo-order-btn:disabled{opacity:.28!important;cursor:default!important}
+.dscan-linked-photo .dscan-photo-drag-handle{
+  position:absolute!important;left:3px!important;top:3px!important;z-index:9!important;
+  width:20px!important;height:20px!important;min-width:20px!important;min-height:20px!important;padding:0!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  border-radius:6px!important;border:1px solid rgba(184,201,220,.96)!important;
+  background:rgba(255,255,255,.94)!important;color:#315674!important;box-shadow:0 1px 4px rgba(18,42,70,.16)!important;
+  font-size:13px!important;line-height:1!important;cursor:grab!important;user-select:none!important;-webkit-user-select:none!important;touch-action:none!important
+}
+.dscan-linked-photo .dscan-photo-drag-handle:active{cursor:grabbing!important}
+.dscan-linked-photo.dscan-photo-drag-source{opacity:.62!important;outline:2px solid #4d8dde!important;outline-offset:2px!important}
+.dscan-linked-photo.dscan-photo-drop-before::before,.dscan-linked-photo.dscan-photo-drop-after::after{
+  content:'';position:absolute;top:-2px;bottom:-2px;width:3px;border-radius:999px;background:#4d8dde;z-index:12;box-shadow:0 0 0 2px rgba(77,141,222,.14)
+}
+.dscan-linked-photo.dscan-photo-drop-before::before{left:-5px}.dscan-linked-photo.dscan-photo-drop-after::after{right:-5px}
+body.dscan-linked-photo-dragging{user-select:none!important;-webkit-user-select:none!important}
+@media(pointer:coarse){
+  .dscan-linked-photo .dscan-photo-drag-handle{width:22px!important;height:22px!important;min-width:22px!important;min-height:22px!important;font-size:14px!important}
+}
 .dscan-unlinked-rotate-btn{position:absolute!important;right:3px!important;bottom:3px!important;width:20px!important;height:20px!important;min-width:20px!important;min-height:20px!important;padding:0!important;border-radius:999px!important;background:rgba(255,255,255,.92)!important;color:#284b72!important;border:1px solid rgba(184,201,220,.95)!important;z-index:6!important;font-size:12px!important}
 .dscan-brief-rotate-btn{font-size:18px!important;min-width:38px!important;padding-left:9px!important;padding-right:9px!important}
 
@@ -8783,17 +8801,86 @@ async function persistPhotoMutation(){
     if(ses?.id&&window.DSCANPhotoPersistence?.persist)await window.DSCANPhotoPersistence.persist(ses.id);
   }catch(e){console.error('[DSCAN photo mutation persist]',e)}
 }
+async function applyLinkedPhotoOrder(rowIndex,orderedIds,logText){
+  const list=linkedPhotosForRow(rowIndex);
+  if(!list.length)return false;
+  const currentIds=list.map(p=>String(p.id));
+  const nextIds=(Array.isArray(orderedIds)?orderedIds:[]).map(String);
+  if(nextIds.length!==currentIds.length||new Set(nextIds).size!==currentIds.length||currentIds.some(id=>!nextIds.includes(id)))return false;
+  if(currentIds.every((id,i)=>id===nextIds[i]))return false;
+  const byId=new Map(list.map(p=>[String(p.id),p]));
+  nextIds.forEach((id,i)=>{const p=byId.get(id);if(p)p.sortOrder=i;});
+  await persistPhotoMutation();
+  renderRows();renderPhotosHub();rebuildBriefingItems();renderBriefingList();
+  try{if(typeof loadCurrentBriefingPhoto==='function'&&document.getElementById('tab-briefing')?.classList.contains('active'))loadCurrentBriefingPhoto()}catch(e){}
+  if(logText)log(logText);
+  return true;
+}
 async function moveLinkedPhoto(photoId,direction){
   const p=photos.find(x=>String(x.id)===String(photoId));if(!p||p.rowIndex===''||p.rowIndex==null)return;
   const list=linkedPhotosForRow(p.rowIndex);const idx=list.findIndex(x=>String(x.id)===String(photoId));
   const target=idx+(direction<0?-1:1);if(idx<0||target<0||target>=list.length)return;
-  list.forEach((x,i)=>x.sortOrder=i);
-  const a=list[idx],b=list[target];const tmp=a.sortOrder;a.sortOrder=b.sortOrder;b.sortOrder=tmp;
-  await persistPhotoMutation();
-  renderRows();renderPhotosHub();rebuildBriefingItems();renderBriefingList();
-  try{if(typeof loadCurrentBriefingPhoto==='function'&&document.getElementById('tab-briefing')?.classList.contains('active'))loadCurrentBriefingPhoto()}catch(e){}
-  log(`연결사진 순서 변경: ${idx+1} → ${target+1}`);
+  const ids=list.map(x=>String(x.id));[ids[idx],ids[target]]=[ids[target],ids[idx]];
+  await applyLinkedPhotoOrder(p.rowIndex,ids,`연결사진 순서 변경: ${idx+1} → ${target+1}`);
 }
+async function reorderLinkedPhotoByDrop(sourceId,targetId,placeAfter){
+  const source=photos.find(x=>String(x.id)===String(sourceId));
+  const target=photos.find(x=>String(x.id)===String(targetId));
+  if(!source||!target||String(source.rowIndex)!==String(target.rowIndex)||String(source.id)===String(target.id))return false;
+  const list=linkedPhotosForRow(source.rowIndex);const ids=list.map(x=>String(x.id));
+  const from=ids.indexOf(String(sourceId));if(from<0)return false;
+  ids.splice(from,1);
+  let at=ids.indexOf(String(targetId));if(at<0)return false;
+  if(placeAfter)at+=1;
+  ids.splice(at,0,String(sourceId));
+  return applyLinkedPhotoOrder(source.rowIndex,ids,`연결사진 드래그 순서 변경: ${from+1} → ${at+1}`);
+}
+const DSCANLinkedPhotoDrag={
+  state:null,
+  clearVisual(){
+    document.querySelectorAll('.dscan-photo-drag-source,.dscan-photo-drop-before,.dscan-photo-drop-after').forEach(el=>el.classList.remove('dscan-photo-drag-source','dscan-photo-drop-before','dscan-photo-drop-after'));
+    document.body.classList.remove('dscan-linked-photo-dragging');
+  },
+  begin(handle,e){
+    const card=handle.closest('.dscan-linked-photo');if(!card)return;
+    const photoId=card.dataset.photoId,rowIndex=card.dataset.rowIndex;if(!photoId||rowIndex==null)return;
+    this.cancel();
+    const isTouch=e.pointerType==='touch'||e.pointerType==='pen';
+    const s=this.state={pointerId:e.pointerId,photoId,rowIndex,startX:e.clientX,startY:e.clientY,active:!isTouch,targetId:null,placeAfter:false,timer:null};
+    if(s.active)this.activate(card);
+    else s.timer=setTimeout(()=>{if(this.state===s){s.active=true;this.activate(card);try{handle.setPointerCapture?.(s.pointerId)}catch(_){}}},340);
+  },
+  activate(card){card.classList.add('dscan-photo-drag-source');document.body.classList.add('dscan-linked-photo-dragging')},
+  move(e){
+    const s=this.state;if(!s||e.pointerId!==s.pointerId)return;
+    if(!s.active){if(Math.hypot(e.clientX-s.startX,e.clientY-s.startY)>9)this.cancel();return;}
+    e.preventDefault();
+    document.querySelectorAll('.dscan-photo-drop-before,.dscan-photo-drop-after').forEach(el=>el.classList.remove('dscan-photo-drop-before','dscan-photo-drop-after'));
+    const hit=document.elementFromPoint(e.clientX,e.clientY)?.closest?.('.dscan-linked-photo');
+    if(!hit||hit.dataset.rowIndex!==String(s.rowIndex)||hit.dataset.photoId===String(s.photoId)){s.targetId=null;return;}
+    const r=hit.getBoundingClientRect();s.placeAfter=e.clientX>(r.left+r.width/2);s.targetId=hit.dataset.photoId;
+    hit.classList.add(s.placeAfter?'dscan-photo-drop-after':'dscan-photo-drop-before');
+  },
+  async end(e){
+    const s=this.state;if(!s||e.pointerId!==s.pointerId)return;
+    if(s.timer)clearTimeout(s.timer);
+    const shouldApply=s.active&&s.targetId;
+    const sourceId=s.photoId,targetId=s.targetId,after=s.placeAfter;
+    this.state=null;this.clearVisual();
+    if(shouldApply){e.preventDefault();await reorderLinkedPhotoByDrop(sourceId,targetId,after);}
+  },
+  cancel(){const s=this.state;if(s?.timer)clearTimeout(s.timer);this.state=null;this.clearVisual()}
+};
+function bindLinkedPhotoDragOrder(){
+  if(window.__DSCAN_LINKED_PHOTO_DRAG_BOUND__)return;
+  window.__DSCAN_LINKED_PHOTO_DRAG_BOUND__=true;
+  document.addEventListener('pointerdown',e=>{const h=e.target.closest?.('.dscan-photo-drag-handle');if(!h)return;e.stopPropagation();DSCANLinkedPhotoDrag.begin(h,e);},{passive:true});
+  document.addEventListener('pointermove',e=>DSCANLinkedPhotoDrag.move(e),{passive:false});
+  document.addEventListener('pointerup',e=>DSCANLinkedPhotoDrag.end(e),{passive:false});
+  document.addEventListener('pointercancel',()=>DSCANLinkedPhotoDrag.cancel(),{passive:true});
+  window.addEventListener('blur',()=>DSCANLinkedPhotoDrag.cancel());
+}
+bindLinkedPhotoDragOrder();
 async function rotatePhoto90(photoId){
   let p=photos.find(x=>String(x.id)===String(photoId));
   if(!p){
@@ -16974,7 +17061,7 @@ document.addEventListener('change',function(e){
       <td>${resultControls(r,i)}</td>
       <td class="dscan-finding-cell"><textarea class="f-finding" placeholder="${r.resultCategory==='우수사례'?'우수사례 내용을 입력하세요.':'부적합사항 또는 현장 메모를 입력하세요.'}">${esc(r.mainText||'')}</textarea></td>
       <td class="briefingToggleCell"><label class="briefingToggleLabel"><input type="checkbox" class="f-briefingIncluded" ${r.briefingIncluded!==false?'checked':''}><span>${r.briefingIncluded!==false?'포함':'제외'}</span></label></td>
-      <td class="auditPhotoConnectCell"><div class="audit-photo-actions"><button onclick="triggerCamera(${i})">촬영</button><button onclick="triggerGallery(${i})">선택</button></div><input class="hiddenInput" id="cameraInput_${i}" type="file" accept="image/*" capture="environment" onchange="attachFilesToRow(event,${i},true)"><input class="hiddenInput" id="galleryInput_${i}" type="file" accept="image/*" multiple onchange="attachFilesToRow(event,${i},false)"><div class="linkedThumbs">${linkedPhotosForRow(i).map((p,pi,arr)=>`<div class="linkedThumb dscan-linked-photo"><img src="${p.url}" title="${esc(p.name)}"><button class="unlinkBtn" title="연결 해제" onclick="unlinkPhoto('${p.id}')">×</button><button type="button" class="dscan-photo-order-btn prev" title="사진 순서 앞으로 이동" aria-label="사진 순서 앞으로 이동" ${pi===0?'disabled':''} onclick="event.stopPropagation();moveLinkedPhoto('${p.id}',-1)">‹</button><button type="button" class="dscan-photo-rotate-btn" title="90° 회전" aria-label="사진 90도 회전" onclick="event.stopPropagation();rotatePhoto90('${p.id}')">↻</button><button type="button" class="dscan-photo-order-btn next" title="사진 순서 뒤로 이동" aria-label="사진 순서 뒤로 이동" ${pi===arr.length-1?'disabled':''} onclick="event.stopPropagation();moveLinkedPhoto('${p.id}',1)">›</button></div>`).join('')}</div></td>
+      <td class="auditPhotoConnectCell"><div class="audit-photo-actions"><button onclick="triggerCamera(${i})">촬영</button><button onclick="triggerGallery(${i})">선택</button></div><input class="hiddenInput" id="cameraInput_${i}" type="file" accept="image/*" capture="environment" onchange="attachFilesToRow(event,${i},true)"><input class="hiddenInput" id="galleryInput_${i}" type="file" accept="image/*" multiple onchange="attachFilesToRow(event,${i},false)"><div class="linkedThumbs">${linkedPhotosForRow(i).map((p,pi,arr)=>`<div class="linkedThumb dscan-linked-photo" data-photo-id="${p.id}" data-row-index="${i}"><img src="${p.url}" title="${esc(p.name)}"><button class="unlinkBtn" title="연결 해제" onclick="unlinkPhoto('${p.id}')">×</button><button type="button" class="dscan-photo-drag-handle" title="드래그하여 사진 순서 변경" aria-label="드래그하여 사진 순서 변경">⠿</button><button type="button" class="dscan-photo-order-btn prev" title="사진 순서 앞으로 이동" aria-label="사진 순서 앞으로 이동" ${pi===0?'disabled':''} onclick="event.stopPropagation();moveLinkedPhoto('${p.id}',-1)">‹</button><button type="button" class="dscan-photo-rotate-btn" title="90° 회전" aria-label="사진 90도 회전" onclick="event.stopPropagation();rotatePhoto90('${p.id}')">↻</button><button type="button" class="dscan-photo-order-btn next" title="사진 순서 뒤로 이동" aria-label="사진 순서 뒤로 이동" ${pi===arr.length-1?'disabled':''} onclick="event.stopPropagation();moveLinkedPhoto('${p.id}',1)">›</button></div>`).join('')}</div></td>
       <td class="photoRiskCell">${typeof renderRowPhotoRiskActions==='function'?renderRowPhotoRiskActions(i):''}</td>
     </tr>`;}).join('');
     bindRowInputs();
