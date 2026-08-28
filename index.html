@@ -497,7 +497,8 @@
   .pdf-render-mini-section{margin-bottom:9px;padding:8px 10px;border:1px solid #dce5ee;border-radius:8px;background:#fbfcfe;color:#425971;font-size:10.5px;line-height:1.5;white-space:pre-wrap}
   .pdf-render-mini-section b{display:block;color:#2d4f72;font-size:10px;margin-bottom:4px}
   .pdf-render-law{background:#f8fbff}
-  .pdf-render-photo-wrap{width:100%;display:flex;justify-content:center;align-items:center;border:1px solid #d7deea;border-radius:10px;overflow:hidden;background:#fff;min-height:430px;max-height:600px}
+  .pdf-render-photo-wrap{width:100%;display:flex;justify-content:center;align-items:center;border:1px solid #d7deea;border-radius:10px;overflow:hidden;background:#fff;min-height:430px;max-height:600px;position:relative}
+  .pdf-render-photo-ordinal{position:absolute;left:14px;top:14px;z-index:2;min-width:44px;height:44px;padding:0 10px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:rgba(5,18,38,.90);color:#fff;font-size:28px;font-weight:900;line-height:1}
   .pdf-render-photo-wrap.no-photo{min-height:360px;background:#f8fafc}
   .pdf-render-photo{max-width:100%;max-height:600px;object-fit:contain;display:block}
   .pdf-render-no-photo{font-size:12px;font-weight:750;color:#8b99aa}
@@ -3047,7 +3048,9 @@ html.inspector-authenticated #inspectorLoginOverlay{display:none!important}
 #tbl .linkedThumbs{margin-top:6px!important;gap:5px!important}
 #tbl .linkedThumb img{width:58px!important;height:44px!important;border-radius:7px!important}
 #tbl .photoRiskCell{min-width:92px!important;text-align:center!important;vertical-align:top!important}
-#tbl .photoRiskCell .photoRiskRowList,#tbl .photoRiskCell .photoRiskEmptyCell{margin-top:69px!important}
+#tbl .photoRiskCell .photoRiskRowList,#tbl .photoRiskCell .photoRiskEmptyCell{margin-top:40px!important}
+#tbl .photoRiskCell .photoRiskRowList{gap:6px!important}
+#tbl .photoRiskCell .photoRiskRowItem{height:58px!important;min-height:58px!important;box-sizing:border-box!important}
 
 /* ---------- Column widths / rhythm ---------- */
 #editorTbl th:nth-child(1){width:42px}
@@ -3901,8 +3904,8 @@ html.dscan-role-admin .tabbar .dscan-admin-only{
 
 .pdf-render-cover{width:794px;height:1123px;position:relative;overflow:hidden;background:#09172a;color:#fff;font-family:"Noto Sans KR",Arial,sans-serif}
 .pdf-cover-bg{position:absolute;inset:0;background-size:cover;background-position:center;opacity:.30}.pdf-cover-shade{position:absolute;inset:0;background:linear-gradient(90deg,rgba(5,12,24,.96),rgba(5,12,24,.55))}
-.pdf-cover-content{position:relative;z-index:2;height:100%;padding:72px 56px;display:flex;flex-direction:column}.pdf-cover-brand{display:none}.pdf-cover-title{margin-top:350px;font-size:48px;font-weight:900;line-height:1.12;letter-spacing:-.04em}.pdf-cover-sub{margin-top:14px;font-size:22px;color:#c8d7e8}.pdf-cover-meta{margin-top:auto;display:flex;justify-content:space-between;align-items:flex-end;font-size:13px;color:#c8d7e8}.pdf-cover-meta b{display:block;color:#fff;margin-top:5px}
-.pdf-render-summary{width:794px;min-height:1123px;background:#fff;color:#17263a;padding:55px 46px;font-family:"Noto Sans KR",Arial,sans-serif}.pdf-summary-title{font-size:28px;font-weight:900;margin-bottom:18px}.pdf-summary-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.pdf-summary-kpi{padding:12px;border:1px solid #dbe3ec;border-radius:10px;background:#f8fafc}.pdf-summary-kpi span{display:block;font-size:10px;color:#728196}.pdf-summary-kpi b{display:block;margin-top:4px;font-size:23px}.pdf-summary-bars{margin-top:18px}.pdf-summary-bar{display:grid;grid-template-columns:170px 1fr 40px;gap:8px;align-items:center;margin:9px 0}.pdf-summary-track{height:10px;background:#e8eef5;border-radius:99px;overflow:hidden}.pdf-summary-track i{display:block;height:100%;background:#4a84d3}.pdf-summary-bar label,.pdf-summary-bar b{font-size:11px}
+.pdf-cover-content{position:relative;z-index:2;height:100%;padding:72px 56px;display:flex;flex-direction:column}.pdf-cover-brand{display:none}.pdf-cover-logo{position:absolute;right:56px;top:58px;width:132px;height:52px;object-fit:contain;object-position:right center;filter:drop-shadow(0 2px 5px rgba(0,0,0,.18))}.pdf-cover-title{margin-top:350px;font-size:48px;font-weight:900;line-height:1.12;letter-spacing:-.04em}.pdf-cover-sub{margin-top:14px;font-size:22px;color:#c8d7e8}.pdf-cover-meta{margin-top:auto;display:flex;justify-content:space-between;align-items:flex-end;font-size:13px;color:#c8d7e8}.pdf-cover-meta b{display:block;color:#fff;margin-top:5px}
+.pdf-render-summary{width:794px;min-height:1123px;background:#fff;color:#17263a;padding:55px 46px;font-family:"Noto Sans KR",Arial,sans-serif}.pdf-summary-title{font-size:28px;font-weight:900;margin-bottom:18px}.pdf-summary-kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}.pdf-summary-kpi{padding:12px;border:1px solid #dbe3ec;border-radius:10px;background:#f8fafc}.pdf-summary-kpi span{display:block;font-size:10px;color:#728196}.pdf-summary-kpi b{display:block;margin-top:4px;font-size:23px}.pdf-summary-part-title{margin:22px 0 8px;font-size:13px;font-weight:900;color:#385a80}.pdf-summary-bars{margin-top:18px}.pdf-summary-bar{display:grid;grid-template-columns:170px 1fr 40px;gap:8px;align-items:center;margin:9px 0}.pdf-summary-track{height:10px;background:#e8eef5;border-radius:99px;overflow:hidden}.pdf-summary-track i{display:block;height:100%;background:#4a84d3}.pdf-summary-bar label,.pdf-summary-bar b{font-size:11px}
 @media(max-width:900px){.dscan-part-choice-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.dscan-audit-score-summary,.dscan-summary-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.dscan-brief-cover-meta{flex-direction:column;align-items:flex-start}.dscan-summary-bar{grid-template-columns:115px 1fr 28px}}
 @media(max-width:520px){.dscan-part-choice-grid{grid-template-columns:1fr}.dscan-date-range label,.dscan-date-range input{width:100%}.dscan-date-wave{display:none}}
 </style>
@@ -8810,6 +8813,38 @@ function linkedPhotosForRow(rowIndex){
     return String(a?.id||'').localeCompare(String(b?.id||''));
   });
 }
+function briefingPhotoIdsForRow(rowIndex){
+  const r=rows?.[Number(rowIndex)];
+  const linked=linkedPhotosForRow(rowIndex);
+  if(!r)return linked.map(p=>String(p.id));
+  if(Array.isArray(r.briefingPhotoIds)){
+    const linkedSet=new Set(linked.map(p=>String(p.id)));
+    return r.briefingPhotoIds.map(String).filter(id=>linkedSet.has(id));
+  }
+  return linked.map(p=>String(p.id));
+}
+function briefingPhotosForRow(rowIndex,sourcePhotos=null,rowOverride=null){
+  const r=rowOverride||rows?.[Number(rowIndex)]||{};
+  const linked=Array.isArray(sourcePhotos)?sourcePhotos:linkedPhotosForRow(rowIndex);
+  const selected=Array.isArray(r.briefingPhotoIds)?new Set(r.briefingPhotoIds.map(String)):null;
+  return linked.map((p,idx)=>Object.assign({},p,{__briefingOrdinal:idx+1})).filter(p=>!selected||selected.has(String(p.id)));
+}
+window.DSCAN_getBriefingPhotosForRow=briefingPhotosForRow;
+window.setBriefingPhotoIncluded=function(rowIndex,photoId,included){
+  const i=Number(rowIndex),r=rows?.[i];if(!r)return;
+  const linked=linkedPhotosForRow(i),validIds=linked.map(p=>String(p.id));
+  const selected=new Set(Array.isArray(r.briefingPhotoIds)?r.briefingPhotoIds.map(String):validIds);
+  if(included)selected.add(String(photoId));else selected.delete(String(photoId));
+  r.briefingPhotoIds=validIds.filter(id=>selected.has(id));
+  try{window.persistCurrentInspectionSnapshot?.()}catch(e){console.error('[DSCAN briefing photo save]',e)}
+  try{window.rebuildBriefingItems?.();window.renderBriefingList?.();window.renderOperationalBriefingIntro?.()}catch(e){console.error(e)}
+};
+function circledPhotoNumber(n){
+  n=Number(n)||0;
+  if(n>=1&&n<=20)return String.fromCodePoint(0x2460+n-1);
+  return n>0?`#${n}`:'';
+}
+window.DSCAN_circledPhotoNumber=circledPhotoNumber;
 function nextPhotoSortOrder(rowIndex){
   const list=photos.filter(p=>String(p.rowIndex)===String(rowIndex));
   return list.reduce((m,p)=>Math.max(m,Number.isFinite(Number(p.sortOrder))?Number(p.sortOrder):-1),-1)+1;
@@ -9652,11 +9687,19 @@ function compressImage(file,maxSize,quality){
 function showProgress(title, text){
   const overlay = document.getElementById('progressOverlay');
   if(!overlay) return;
+  const fs=document.fullscreenElement||document.webkitFullscreenElement||null;
+  if(fs&&overlay.parentElement!==fs){
+    overlay.__dscanProgressHome=overlay.parentElement||document.body;
+    fs.appendChild(overlay);
+  }else if(!fs&&overlay.parentElement!==document.body){
+    document.body.appendChild(overlay);
+  }
   document.getElementById('progressTitle').textContent = title || '처리 중';
   document.getElementById('progressText').textContent = text || '잠시만 기다려 주세요. 창을 닫지 마세요.';
   document.getElementById('progressBar').style.width = '0%';
   document.getElementById('progressPercent').textContent = '0%';
   overlay.style.display = 'flex';
+  overlay.style.zIndex='2147483400';
   requestAnimationFrame(()=>overlay.classList.add('active'));
 }
 function updateProgress(done, total, text){
@@ -9679,7 +9722,12 @@ function hideProgress(delay=250){
   if(!overlay) return;
   setTimeout(()=>{
     overlay.classList.remove('active');
-    setTimeout(()=>{ overlay.style.display = 'none'; }, 180);
+    setTimeout(()=>{
+      overlay.style.display = 'none';
+      overlay.style.zIndex='';
+      if(overlay.parentElement!==document.body)document.body.appendChild(overlay);
+      overlay.__dscanProgressHome=null;
+    }, 180);
   }, delay);
 }
 function nextFrame(){
@@ -9968,6 +10016,7 @@ function buildSessionObject(){
       const live=liveMap.get(lawKey(r,i));if(!live)return;
       if(Array.isArray(live.relatedLaws))r.relatedLaws=deepCloneSafe(live.relatedLaws);
       if(typeof live.sourceLawText==='string')r.sourceLawText=live.sourceLawText;
+      if(Array.isArray(live.briefingPhotoIds))r.briefingPhotoIds=deepCloneSafe(live.briefingPhotoIds);
     });
   }catch(e){console.error('[DSCAN ZIP legal overlay]',e)}
   const safeFileName=(v)=>String(v||'photo.jpg').replace(/[\\/:*?"<>|]+/g,'_');
@@ -10615,6 +10664,18 @@ function redrawViewer(){
     ctx.stroke();
   });
   ctx.restore();
+
+  try{
+    const item=briefingItems?.[currentItemIndex],photo=item?.linkedPhotos?.[currentPhotoIndex];
+    const ordinal=Number(photo?.__briefingOrdinal||0);
+    if(ordinal>0){
+      const label=circledPhotoNumber(ordinal),x=Math.max(12,translateX+14),y=Math.max(12,translateY+14);
+      ctx.save();ctx.font='900 34px Pretendard, Arial, sans-serif';ctx.textBaseline='top';
+      const w=Math.max(48,ctx.measureText(label).width+20);ctx.fillStyle='rgba(5,18,38,.88)';ctx.beginPath();
+      if(typeof ctx.roundRect==='function')ctx.roundRect(x-6,y-5,w,46,12);else ctx.rect(x-6,y-5,w,46);
+      ctx.fill();ctx.fillStyle='#fff';ctx.fillText(label,x+4,y);ctx.restore();
+    }
+  }catch(e){}
 
   // magnifier overlay
   if(currentTool==='magnifier' && magnifierVisible){
@@ -11947,7 +12008,7 @@ async function buildPdfPageElement(item, photo, photoIdx, totalPhotos, pageNumbe
     <div class="pdf-render-main">${escapeHtml(mainText)}</div>
     ${criteria?`<div class="pdf-render-mini-section"><b>체크리스트 세부기준</b><div>${escapeHtml(criteria)}</div></div>`:''}
     ${lawText?`<div class="pdf-render-mini-section pdf-render-law"><b>관계법령</b><div>${escapeHtml(lawText)}</div></div>`:''}
-    <div class="pdf-render-photo-wrap ${photoDataUrl?'':'no-photo'}">${photoDataUrl?`<img class="pdf-render-photo" src="${photoDataUrl}" alt="photo">`:'<div class="pdf-render-no-photo">사진 없음</div>'}</div>
+    <div class="pdf-render-photo-wrap ${photoDataUrl?'':'no-photo'}">${photoDataUrl?`${Number(photo?.__briefingOrdinal||0)>0?`<div class="pdf-render-photo-ordinal">${escapeHtml(circledPhotoNumber(photo.__briefingOrdinal))}</div>`:''}<img class="pdf-render-photo" src="${photoDataUrl}" alt="photo">`:'<div class="pdf-render-no-photo">사진 없음</div>'}</div>
     <div class="pdf-render-photo-meta">${photo?`사진 ${photoIdx}/${totalPhotos} · ${escapeHtml(photo.name||'')}`:'사진 없음'}</div>
     <div class="pdf-render-footer">${pageNumber}/${totalPages}</div>`;
   return page;
@@ -12020,7 +12081,8 @@ async function safeDownloadPdf(){
       alert('PDF 생성 오류: jsPDF 로드 실패');
       return;
     }
-    await downloadBriefingPdf();
+    if(typeof window.downloadBriefingPdf!=='function')throw new Error('통합 PDF 엔진을 찾을 수 없습니다.');
+    await window.downloadBriefingPdf();
   }catch(e){
     console.error(e);
     alert('PDF 생성 오류: ' + (e && e.message ? e.message : e));
@@ -17099,7 +17161,7 @@ document.addEventListener('change',function(e){
       <td>${statusControls(r,i)}</td>
       <td>${resultControls(r,i)}</td>
       <td class="dscan-finding-cell"><textarea class="f-finding" placeholder="${r.resultCategory==='우수사례'?'우수사례 내용을 입력하세요.':'부적합사항 또는 현장 메모를 입력하세요.'}">${esc(r.mainText||'')}</textarea></td>
-      <td class="briefingToggleCell"><label class="briefingToggleLabel"><input type="checkbox" class="f-briefingIncluded" ${r.briefingIncluded!==false?'checked':''}><span>${r.briefingIncluded!==false?'포함':'제외'}</span></label></td>
+      <td class="briefingToggleCell"><label class="briefingToggleLabel"><input type="checkbox" class="f-briefingIncluded" ${r.briefingIncluded!==false?'checked':''}><span>${r.briefingIncluded!==false?'포함':'제외'}</span></label><div class="dscan-brief-photo-picks">${linkedPhotosForRow(i).map((p,pi)=>{const picked=briefingPhotoIdsForRow(i).includes(String(p.id));return `<label class="dscan-brief-photo-pick ${r.briefingIncluded!==false?'':'disabled'}" title="사진 ${pi+1} 강평 ${picked?'포함':'제외'}"><input type="checkbox" class="f-briefingPhotoIncluded" data-photo-id="${esc(p.id)}" ${picked?'checked':''} ${r.briefingIncluded!==false?'':'disabled'}><span>${circledPhotoNumber(pi+1)}</span></label>`;}).join('')}</div></td>
       <td class="auditPhotoConnectCell"><div class="audit-photo-actions"><button onclick="triggerCamera(${i})">촬영</button><button onclick="triggerGallery(${i})">선택</button></div><input class="hiddenInput" id="cameraInput_${i}" type="file" accept="image/*" capture="environment" onchange="attachFilesToRow(event,${i},true)"><input class="hiddenInput" id="galleryInput_${i}" type="file" accept="image/*" multiple onchange="attachFilesToRow(event,${i},false)"><div class="linkedThumbs">${linkedPhotosForRow(i).map((p,pi,arr)=>`<div class="linkedThumb dscan-linked-photo" data-photo-id="${p.id}" data-row-index="${i}"><img src="${p.url}" title="${esc(p.name)}" onmouseenter="showHoverPreview(event,'${p.url}')" onmousemove="moveHoverPreview(event)" onmouseleave="hideHoverPreview()"><button class="unlinkBtn" title="연결 해제" onclick="unlinkPhoto('${p.id}')">×</button><button type="button" class="dscan-photo-drag-handle" title="드래그하여 사진 순서 변경" aria-label="드래그하여 사진 순서 변경">⠿</button><button type="button" class="dscan-photo-order-btn prev" title="사진 순서 앞으로 이동" aria-label="사진 순서 앞으로 이동" ${pi===0?'disabled':''} onclick="event.stopPropagation();moveLinkedPhoto('${p.id}',-1)">‹</button><button type="button" class="dscan-photo-rotate-btn" title="90° 회전" aria-label="사진 90도 회전" onclick="event.stopPropagation();rotatePhoto90('${p.id}')">↻</button><button type="button" class="dscan-photo-order-btn next" title="사진 순서 뒤로 이동" aria-label="사진 순서 뒤로 이동" ${pi===arr.length-1?'disabled':''} onclick="event.stopPropagation();moveLinkedPhoto('${p.id}',1)">›</button></div>`).join('')}</div></td>
       <td class="photoRiskCell">${typeof renderRowPhotoRiskActions==='function'?renderRowPhotoRiskActions(i):''}</td>
     </tr>`;}).join('');
@@ -17153,26 +17215,26 @@ document.addEventListener('change',function(e){
       }
       const br=tr.querySelector('.f-briefingIncluded');
       if(br)br.addEventListener('change',()=>{
-        /* v4.5.87 — this is the FINAL operational input handler actually used by the audit table.
-           Persist the flag in the same transaction as the UI change. */
         r.briefingIncluded=!!br.checked;
         try{window.DSCAN_saveBriefingFlag?.(r,i,r.briefingIncluded)}catch(e){console.error('[DSCAN briefing flag immediate mirror]',e)}
         const sp=br.closest('label')?.querySelector('span');
         if(sp)sp.textContent=br.checked?'포함':'제외';
-
-        try{
-          window.syncRowsFromTable?.();
-          window.persistCurrentInspectionSnapshot?.();
-        }catch(e){console.error('[DSCAN briefing flag save]',e)}
-
-        rebuildBriefingItems();
-        renderBriefingList();
-        try{renderOperationalBriefingIntro?.()}catch(e){}
+        tr.querySelectorAll('.f-briefingPhotoIncluded').forEach(cb=>{
+          cb.disabled=!br.checked;
+          cb.closest('.dscan-brief-photo-pick')?.classList.toggle('disabled',!br.checked);
+        });
+        try{window.syncRowsFromTable?.();window.persistCurrentInspectionSnapshot?.();}catch(e){console.error('[DSCAN briefing flag save]',e)}
+        rebuildBriefingItems();renderBriefingList();try{renderOperationalBriefingIntro?.()}catch(e){}
       });
+      tr.querySelectorAll('.f-briefingPhotoIncluded').forEach(cb=>cb.addEventListener('change',()=>{
+        window.setBriefingPhotoIncluded?.(i,cb.dataset.photoId,!!cb.checked);
+        const label=cb.closest('.dscan-brief-photo-pick');
+        if(label){const ord=linkedPhotosForRow(i).findIndex(p=>String(p.id)===String(cb.dataset.photoId))+1;label.title=`사진 ${ord} 강평 ${cb.checked?'포함':'제외'}`;}
+      }));
     });
   };
   window.syncRowsFromTable=function(){
-    document.querySelectorAll('#tbl tbody tr').forEach(tr=>{const i=Number(tr.dataset.row),r=rows[i];if(!r)return;const cr=tr.querySelector('.f-criteria'),fd=tr.querySelector('.f-finding'),sc=tr.querySelector('.f-earnedScore'),br=tr.querySelector('.f-briefingIncluded');if(cr)r.criteria=cr.value;if(fd)r.mainText=fd.value;if(sc&&sc.value!=='')r.earnedScore=Number(sc.value);if(br)r.briefingIncluded=br.checked;syncDerived(r);});
+    document.querySelectorAll('#tbl tbody tr').forEach(tr=>{const i=Number(tr.dataset.row),r=rows[i];if(!r)return;const cr=tr.querySelector('.f-criteria'),fd=tr.querySelector('.f-finding'),sc=tr.querySelector('.f-earnedScore'),br=tr.querySelector('.f-briefingIncluded');if(cr)r.criteria=cr.value;if(fd)r.mainText=fd.value;if(sc&&sc.value!=='')r.earnedScore=Number(sc.value);if(br)r.briefingIncluded=br.checked;const photoChecks=[...tr.querySelectorAll('.f-briefingPhotoIncluded')];if(photoChecks.length)r.briefingPhotoIds=photoChecks.filter(cb=>cb.checked).map(cb=>String(cb.dataset.photoId));syncDerived(r);});
   };
   window.DSCAN_BRIEFING_FLAG_STATE=function(){
     const ses=(()=>{try{return JSON.parse(localStorage.getItem('dscan_inspection_session_v1')||'null')}catch(e){return null}})();
@@ -17207,21 +17269,31 @@ document.addEventListener('change',function(e){
   window.attachFilesToRow=async function(event,rowIndex,isCamera){
     const before=new Set(photos.map(p=>p.id));
     await oldAttach(event,rowIndex,isCamera);
-    photos.filter(p=>!before.has(p.id)&&String(p.rowIndex)===String(rowIndex)).forEach(p=>finalizePhotoName(p,rowIndex));
+    const added=photos.filter(p=>!before.has(p.id)&&String(p.rowIndex)===String(rowIndex));
+    added.forEach(p=>finalizePhotoName(p,rowIndex));
+    const rr=rows?.[Number(rowIndex)];
+    if(rr&&Array.isArray(rr.briefingPhotoIds)&&rr.briefingIncluded!==false){const set=new Set(rr.briefingPhotoIds.map(String));added.forEach(p=>set.add(String(p.id)));rr.briefingPhotoIds=linkedPhotosForRow(rowIndex).map(p=>String(p.id)).filter(id=>set.has(id));}
+    try{window.persistCurrentInspectionSnapshot?.()}catch(e){}
     renderRows();renderPhotosHub();rebuildBriefingItems();renderBriefingList();renderOperationalBriefingIntro();
   };
   window.directConnectPhoto=function(photoId,rowIndex){
     const p=photos.find(x=>x.id===photoId);if(!p)return;
     finalizePhotoName(p,rowIndex);
+    const rr=rows?.[Number(rowIndex)];
+    if(rr&&Array.isArray(rr.briefingPhotoIds)&&rr.briefingIncluded!==false){const set=new Set(rr.briefingPhotoIds.map(String));set.add(String(p.id));rr.briefingPhotoIds=linkedPhotosForRow(rowIndex).map(x=>String(x.id)).filter(id=>set.has(id));}
+    try{window.persistCurrentInspectionSnapshot?.()}catch(e){}
     renderRows();renderPhotosHub();rebuildBriefingItems();renderBriefingList();renderOperationalBriefingIntro();
     if(typeof log==='function')log(`${Number(rowIndex)+1}행에 직접연결 완료: ${p.name}`);
   };
   window.unlinkPhoto=function(photoId){
     const p=photos.find(x=>x.id===photoId);if(!p)return;
     const oldRow=String(p.rowIndex??'');
+    const rr=oldRow!==''?rows?.[Number(oldRow)]:null;
+    if(rr&&Array.isArray(rr.briefingPhotoIds))rr.briefingPhotoIds=rr.briefingPhotoIds.map(String).filter(id=>id!==String(photoId));
     p.rowIndex='';
     if(p.originalName)p.name=p.originalName;
     if(oldRow!=='')renameLinkedPhotoGroup(oldRow);
+    try{window.persistCurrentInspectionSnapshot?.()}catch(e){}
     renderRows();renderPhotosHub();rebuildBriefingItems();renderBriefingList();renderOperationalBriefingIntro();
   };
 
@@ -17328,7 +17400,7 @@ document.addEventListener('change',function(e){
     return s?.site||'사업장';
   }
   function summaryData(){
-    const source=(typeof window.getAllBriefingSourceEntries==='function'?window.getAllBriefingSourceEntries():rows.map((r,i)=>({row:r,rowIndex:i,photos:linkedPhotosForRow(i)})));
+    const source=(typeof window.getAllBriefingSourceEntries==='function'?window.getAllBriefingSourceEntries():rows.map((r,i)=>({row:r,rowIndex:i,photos:briefingPhotosForRow(i,linkedPhotosForRow(i),r)})));
     const included=source.map(x=>x.row).filter(r=>r.briefingIncluded!==false);
     const counts={'우수사례':0,'부적합':0,'적합':0};
     included.forEach(r=>counts[r.resultCategory]=(counts[r.resultCategory]||0)+1);
@@ -17340,7 +17412,7 @@ document.addEventListener('change',function(e){
   function firstCoverPhoto(){
     const source=typeof window.getAllBriefingSourceEntries==='function'
       ? window.getAllBriefingSourceEntries()
-      : rows.map((r,i)=>({row:r,photos:linkedPhotosForRow(i)}));
+      : rows.map((r,i)=>({row:r,photos:briefingPhotosForRow(i,linkedPhotosForRow(i),r)}));
     const candidates=source.filter(x=>x.row?.briefingIncluded!==false&&(x.photos||[]).length)
       .sort((a,b)=>(RESULT_ORDER[a.row.resultCategory]??9)-(RESULT_ORDER[b.row.resultCategory]??9));
     return candidates[0]?.photos?.[0]?.url||'';
@@ -17489,12 +17561,22 @@ document.addEventListener('change',function(e){
     return html2canvas(page,{scale:1.35,useCORS:true,backgroundColor:'#ffffff',logging:false}).then(canvas=>{const img=canvas.toDataURL('image/jpeg',.90);if(!first)doc.addPage();doc.addImage(img,'JPEG',0,0,doc.internal.pageSize.getWidth(),doc.internal.pageSize.getHeight(),undefined,'FAST');});
   }
   function buildPdfCover(){
-    const el=document.createElement('div');el.className='pdf-render-cover';const p=firstCoverPhoto();const s=currentSession();const inspectors=uniqInspectors();
-    el.innerHTML=`<div class="pdf-cover-bg" style="${p?`background-image:url('${p}')`:''}"></div><div class="pdf-cover-shade"></div><div class="pdf-cover-content"><div class="pdf-cover-title">${esc(siteName())}<br>기술지원 결과보고</div><div class="pdf-cover-sub">${esc(s?.year||'')} ${esc(s?.half||'')}</div><div class="pdf-cover-meta"><div>기술지원 기간<b>${esc(dateRangeText()||'-')}</b></div><div>기술지원 담당자<b>${inspectors.map(x=>esc(`${x.name}${x.rank?' '+x.rank:''}`)).join(' · ')||'-'}</b></div></div></div>`;return el;
+    const el=document.createElement('div');el.className='pdf-render-cover';const p=firstCoverPhoto();const s=currentSession();const inspectors=uniqInspectors();const logo=getCurrentCiLogoDataUri();
+    el.innerHTML=`<div class="pdf-cover-bg" style="${p?`background-image:url('${p}')`:''}"></div><div class="pdf-cover-shade"></div><div class="pdf-cover-content">${logo?`<img class="pdf-cover-logo" src="${logo}" alt="CI Logo">`:''}<div class="pdf-cover-title">${esc(siteName())}<br>기술지원 결과보고</div><div class="pdf-cover-sub">${esc(s?.year||'')} ${esc(s?.half||'')}</div><div class="pdf-cover-meta"><div>기술지원 기간<b>${esc(dateRangeText()||'-')}</b></div><div>기술지원 담당자<b>${inspectors.map(x=>esc(`${x.name}${x.rank?' '+x.rank:''}`)).join(' · ')||'-'}</b></div></div></div>`;return el;
   }
-  function buildPdfSummary(){
-    const d=summaryData(),max=Math.max(1,...Object.values(d.core));const el=document.createElement('div');el.className='pdf-render-summary';
-    el.innerHTML=`<div class="pdf-summary-title">전체 강평 요약</div><div class="pdf-summary-kpis"><div class="pdf-summary-kpi"><span>강평 대상</span><b>${d.included.length}</b></div><div class="pdf-summary-kpi"><span>우수사례</span><b>${d.counts['우수사례']||0}</b></div><div class="pdf-summary-kpi"><span>부적합</span><b>${d.counts['부적합']||0}</b></div><div class="pdf-summary-kpi"><span>적합</span><b>${d.counts['적합']||0}</b></div></div><div class="pdf-summary-parts">${(d.parts||[]).map(p=>`<div class="pdf-summary-part"><span>${esc(p.name)}</span><b>${p.total}개</b><small>우수 ${p.good} · 부적합 ${p.bad} · 적합 ${p.ok}</small></div>`).join('')}</div><div class="pdf-summary-bars">${['안전보건 관리 체제','안전보건 교육','유해위험 방지 조치','도급 시 산업재해 예방','근로자 보건 관리','유해위험 물질 관리'].map(k=>`<div class="pdf-summary-bar"><label>${k}</label><div class="pdf-summary-track"><i style="width:${((d.core[k]||0)/max*100).toFixed(0)}%"></i></div><b>${d.core[k]||0}</b></div>`).join('')}</div>`;return el;
+  function buildPdfSummary(source){
+    const entries=Array.isArray(source)?source:[];
+    const total=entries.length;
+    const briefingTarget=entries.filter(x=>x?.row?.briefingIncluded!==false).length;
+    const good=entries.filter(x=>x?.row?.resultCategory==='우수사례').length;
+    const bad=entries.filter(x=>x?.row?.resultCategory==='부적합').length;
+    const rate=total?(((total-bad)/total)*100).toFixed(1):'0.0';
+    const order=['안전','보건','안전(도급)','보건(도급)'];
+    const map={};
+    entries.forEach(x=>{const r=x?.row||{};const name=String(r.part||'기타');if(!map[name])map[name]={name,total:0,good:0,bad:0};const p=map[name];p.total++;if(r.resultCategory==='우수사례')p.good++;else if(r.resultCategory==='부적합')p.bad++;});
+    const parts=Object.values(map).sort((a,b)=>{const ai=order.indexOf(a.name),bi=order.indexOf(b.name);return(ai<0?99:ai)-(bi<0?99:bi)}).slice(0,4);
+    const el=document.createElement('div');el.className='pdf-render-summary';
+    el.innerHTML=`<div class="pdf-summary-title">전체 강평 요약</div><div class="pdf-summary-kpis"><div class="pdf-summary-kpi"><span>전체항목</span><b>${total}</b></div><div class="pdf-summary-kpi"><span>강평대상</span><b>${briefingTarget}</b></div><div class="pdf-summary-kpi"><span>우수사례</span><b>${good}</b></div><div class="pdf-summary-kpi"><span>부적합</span><b>${bad}</b></div><div class="pdf-summary-kpi"><span>적합률</span><b>${rate}%</b></div></div><div class="pdf-summary-part-title">파트별 현황</div><div class="pdf-summary-parts">${parts.map(p=>{const pr=p.total?(((p.total-p.bad)/p.total)*100).toFixed(1):'0.0';return `<div class="pdf-summary-part"><span>${esc(p.name)}</span><b>${p.total}개</b><small>우수 ${p.good} · 부적합 ${p.bad} · 적합률 ${pr}%</small></div>`}).join('')}</div>`;return el;
   }
   window.downloadBriefingPdf=async function(){
     const allFilter=briefingPartFilter;
@@ -17505,12 +17587,18 @@ document.addEventListener('change',function(e){
       rows=JSON.parse(JSON.stringify(ses.completedRows));
     }
 
-    /* PDF is a final report, not the current part viewport.
-       If ZIP aggregate workspaces exist, collect every workspace through the public aggregate source. */
+    /* Canonical result-report source. PDF is independent from the presentation filter:
+       summary = every row, detail = every Good + every Nonconformity, regardless of briefingIncluded. */
     const liveAggregate=!!(typeof window.isZipAggregateMode==='function'&&window.isZipAggregateMode());
-    const rawSource=liveAggregate&&typeof window.getAllBriefingSourceEntries==='function'
-      ? window.getAllBriefingSourceEntries()
-      : rows.map((r,i)=>({row:r,rowIndex:i,photos:linkedPhotosForRow(i),workspaceKey:''}));
+    const profileOrder=['safety','health','safety_contractor','health_contractor'];
+    const profileName={safety:'안전',health:'보건',safety_contractor:'안전(도급)',health_contractor:'보건(도급)'};
+    let rawSource=[];
+    if(liveAggregate&&typeof window.getAggregatedPartWorkspaces==='function'){
+      const spaces=window.getAggregatedPartWorkspaces()||{};
+      profileOrder.forEach(key=>{const ws=spaces[key];if(!ws||!Array.isArray(ws.rows))return;ws.rows.forEach((raw,i)=>{const row=typeof normalizeOperationalRow==='function'?normalizeOperationalRow(raw):raw;row.part=row.part||profileName[key];const all=(ws.photos||[]).filter(p=>String(p.rowIndex)===String(i)).sort((a,b)=>{const ao=Number.isFinite(Number(a?.sortOrder))?Number(a.sortOrder):Number.MAX_SAFE_INTEGER,bo=Number.isFinite(Number(b?.sortOrder))?Number(b.sortOrder):Number.MAX_SAFE_INTEGER;return ao!==bo?ao-bo:String(a?.id||'').localeCompare(String(b?.id||''))}).map((p,idx)=>Object.assign({},p,{__briefingOrdinal:idx+1}));rawSource.push({row,rowIndex:i,photos:all,workspaceKey:key})})});
+    }else{
+      rawSource=rows.map((raw,i)=>{const row=typeof normalizeOperationalRow==='function'?normalizeOperationalRow(raw):raw;const all=linkedPhotosForRow(i).map((p,idx)=>Object.assign({},p,{__briefingOrdinal:idx+1}));return{row,rowIndex:i,photos:all,workspaceKey:row?.profileId||row?.sourceSession?.profileId||''}});
+    }
 
     const partOrder={'안전':0,'보건':1,'안전(도급)':2,'보건(도급)':3};
     const resultOrder={'우수사례':0,'부적합':1};
@@ -17518,15 +17606,11 @@ document.addEventListener('change',function(e){
     const pdfItems=rawSource
       .map((x,i)=>({
         rowIndex:Number.isFinite(Number(x.rowIndex))?Number(x.rowIndex):i,
-        row:(typeof normalizeOperationalRow==='function'?normalizeOperationalRow(x.row):x.row),
+        row:x.row,
         linkedPhotos:Array.isArray(x.photos)?x.photos:[],
         workspaceKey:x.workspaceKey||''
       }))
-      .filter(x=>
-        x.row &&
-        x.row.briefingIncluded!==false &&
-        (x.row.resultCategory==='우수사례'||x.row.resultCategory==='부적합')
-      )
+      .filter(x=>x.row&&(x.row.resultCategory==='우수사례'||x.row.resultCategory==='부적합'))
       .sort((a,b)=>{
         const ap=partOrder[a.row.part]??9,bp=partOrder[b.row.part]??9;
         if(ap!==bp)return ap-bp;
@@ -17548,7 +17632,7 @@ document.addEventListener('change',function(e){
     const host=document.createElement('div');host.style.cssText='position:fixed;left:-10000px;top:0;z-index:-1';document.body.appendChild(host);
     try{
       const cover=buildPdfCover();host.appendChild(cover);await pdfPageToImage(doc,cover,true);cover.remove();done++;updateProgress(done,total,`표지 완료 · ${done}/${total} 페이지`);await nextFrame();
-      const summary=buildPdfSummary();host.appendChild(summary);await pdfPageToImage(doc,summary,false);summary.remove();done++;updateProgress(done,total,`요약 완료 · ${done}/${total} 페이지`);await nextFrame();
+      const summary=buildPdfSummary(rawSource);host.appendChild(summary);await pdfPageToImage(doc,summary,false);summary.remove();done++;updateProgress(done,total,`요약 완료 · ${done}/${total} 페이지`);await nextFrame();
 
       let pageNum=2;
       for(const item of pdfItems){
@@ -17562,7 +17646,7 @@ document.addEventListener('change',function(e){
         }
       }
 
-      completeProgress(`PDF 저장 준비 완료 · 우수사례/부적합 ${pdfItems.length}개 항목`);
+      completeProgress(`PDF 저장 준비 완료 · 우수사례/부적합 ${pdfItems.length}개 항목 · 전체 ${rawSource.length}개 항목`);
       const file=`DSCAN_${String(siteName()).replace(/\s+/g,'_')}_${dateRangeText().replace(/\s|~/g,'_')}_기술지원_결과보고.pdf`;
       doc.save(file);
     }finally{
@@ -21769,13 +21853,7 @@ ${err?.message||err}`);
   const prevIntro=window.renderOperationalBriefingIntro;
   if(typeof prevIntro==='function')window.renderOperationalBriefingIntro=function(){const out=prevIntro.apply(this,arguments);refineSummary();return out};
 
-  /* PDF summary receives the same sample/nonconformity definition. */
-  const prevPdf=window.downloadBriefingPdf;
-  // buildPdfSummary is closure-local in the legacy engine, so PDF rendering is refined via DOM mutation while off-screen pages are built.
-  if(typeof prevPdf==='function')window.downloadBriefingPdf=async function(){
-    const obs=new MutationObserver(ms=>{for(const m of ms)for(const n of m.addedNodes||[]){if(n?.nodeType===1&&n.classList?.contains('pdf-render-summary')){const bars=n.querySelector('.pdf-summary-bars');if(bars)bars.outerHTML=`<div class="pdf-core-sample-grid">${coreCards('pdf')}</div>`}}});
-    obs.observe(document.body,{childList:true,subtree:true});try{return await prevPdf.apply(this,arguments)}finally{obs.disconnect()}
-  };
+  /* PDF summary is now canonical in buildPdfSummary(): no DOM mutation/refinement wrapper. */
 
   function boot(){window.renderDscanDataContext?.();try{window.renderOperationalBriefingIntro?.()}catch(e){}}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else setTimeout(boot,0);
@@ -22072,12 +22150,7 @@ ${err?.message||err}`);
     const entries=sourceEntries(),st=calcStats(entries),parts=partStats(entries),top=topFive(entries);const el=document.createElement('div');el.className='pdf-final-summary';el.innerHTML=`<div class="pdf-final-kicker">종합 총평</div><div class="pdf-final-title">종합 총평</div><div class="pdf-final-sub">${esc((typeof currentSession==='function'?currentSession()?.site:'')||'사업장')} 기술지원 · 상세 강평 이후 최종 요약</div><div class="pdf-final-kpis"><div class="pdf-final-kpi"><span>총 항목</span><b>${st.total}</b></div><div class="pdf-final-kpi"><span>부적합</span><b>${st.bad}</b></div><div class="pdf-final-kpi"><span>우수사례</span><b>${st.good}</b></div><div class="pdf-final-kpi"><span>적합률</span><b>${st.rate}%</b></div></div><div class="pdf-final-section"><h3>Executive Message</h3><div class="pdf-final-message">${esc(overallMessage(entries))}</div></div><div class="pdf-final-section"><h3>TOP 5 위험요소</h3><div class="pdf-final-top5">${top.map((t,i)=>`<div><b>${i+1}</b><span><strong>${esc(t.title)}</strong><br>${esc((t.detail||'세부 부적합 내용 미입력').slice(0,100))}</span><em>${esc(t.part)}</em></div>`).join('')||'<div>부적합 없음</div>'}</div></div><div class="pdf-final-section"><h3>Part Review</h3><div class="pdf-summary-parts">${parts.map(p=>`<div class="pdf-summary-part"><span>${esc(p.name)}</span><b>부적합 ${p.bad}/${p.total}</b><small>적합 ${p.ok+p.good} · 우수 ${p.good}</small></div>`).join('')}</div></div>`;return el;
   };
 
-  /* PDF Executive Summary gets TOP 5 too. The existing v4.5.32 observer still replaces the six-core chart. */
-  const prevPdf=window.downloadBriefingPdf;
-  if(typeof prevPdf==='function')window.downloadBriefingPdf=async function(){
-    const obs=new MutationObserver(ms=>{for(const m of ms)for(const node of (m.addedNodes||[])){if(node?.nodeType!==1)continue;const targets=[];if(node.classList?.contains('pdf-render-summary'))targets.push(node);node.querySelectorAll?.('.pdf-render-summary').forEach(x=>targets.push(x));targets.forEach(pg=>{if(pg.querySelector('.pdf-top5-section'))return;const top=topFive(sourceEntries());const box=document.createElement('div');box.className='pdf-top5-section';box.innerHTML=`<div class="pdf-top5-title">TOP 5 위험요소</div>${top.map((t,i)=>`<div class="pdf-top5-row"><b>${i+1}</b><span>${esc(t.title)}${t.detail?` · ${esc(t.detail.slice(0,70))}`:''}</span><em>${esc(t.part)}</em></div>`).join('')||'<div class="pdf-top5-row"><span>부적합 없음</span></div>'}`;pg.appendChild(box)})}});
-    obs.observe(document.body,{childList:true,subtree:true});try{return await prevPdf.apply(this,arguments)}finally{obs.disconnect()}
-  };
+  /* PDF summary is intentionally limited to KPI + part status; detail pages follow immediately. */
 
   /* Preserve ZIP aggregation contract: when import/removal changes workspaces, re-render all executive briefing layers. */
   const prevImport=window.importMultipleSessionZips;
@@ -22689,7 +22762,14 @@ ${err?.message||err}`);
 <style id="dscan-v4541-precision-style">
 #tbl.dscan-operational-table th:nth-child(13):not(.dscan-col-collapsed),
 #tbl.dscan-operational-table td:nth-child(13):not(.dscan-col-collapsed){width:76px!important;min-width:76px!important;max-width:76px!important}
-#tbl.dscan-operational-table td:nth-child(13) .briefingToggleLabel{width:54px!important;min-width:54px!important;max-width:54px!important}
+#tbl.dscan-operational-table td:nth-child(13) .briefingToggleLabel{width:54px!important;min-width:54px!important;max-width:54px!important;height:34px!important;min-height:34px!important;box-sizing:border-box!important;flex-direction:row!important}
+#tbl .dscan-brief-photo-picks{display:flex!important;flex-direction:column!important;align-items:center!important;gap:6px!important;margin-top:6px!important}
+#tbl .dscan-brief-photo-pick{width:58px!important;height:58px!important;min-width:58px!important;min-height:58px!important;box-sizing:border-box!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:5px!important;border:1px solid #ccd9e8!important;border-radius:7px!important;background:#f7faff!important;cursor:pointer!important;position:relative!important}
+#tbl .dscan-brief-photo-pick input{width:16px!important;height:16px!important;margin:0!important;accent-color:#2459b6!important;cursor:pointer!important}
+#tbl .dscan-brief-photo-pick span{font-size:15px!important;font-weight:900!important;line-height:1!important;color:#24559a!important}
+#tbl .dscan-brief-photo-pick:has(input:checked){background:#edf5ff!important;border-color:#91b3df!important;box-shadow:inset 0 0 0 1px rgba(36,89,182,.08)!important}
+#tbl .dscan-brief-photo-pick.disabled{opacity:.38!important;cursor:not-allowed!important;background:#f3f5f7!important}
+#tbl .dscan-brief-photo-pick.disabled input{cursor:not-allowed!important}
 #tab-briefing .dscan-criteria-detail #metaCriteria{font-size:10px!important;line-height:1.55!important;letter-spacing:-.01em!important;color:#b7c5d5!important}
 #tab-briefing #briefingToolbarProtected{position:relative!important;top:auto!important;z-index:auto!important}
 #tab-briefing #briefingList{max-height:430px!important;overflow-y:auto!important;overflow-x:hidden!important;padding:7px!important;border:1px solid #263a52!important;border-radius:10px!important;background:#071322!important;overscroll-behavior:contain!important;scrollbar-width:thin!important;scrollbar-color:#506981 transparent!important}
@@ -22733,7 +22813,11 @@ function ensurePhotoUrl(photo){
   if(!photo)return'';
   try{
     const blob=photo.blob instanceof Blob?photo.blob:(photo.file instanceof Blob?photo.file:null);
-    if(blob&&!photo.__dscanBriefUrlResolved){try{if(String(photo.url||'').startsWith('blob:'))URL.revokeObjectURL(photo.url)}catch(e){}photo.url=URL.createObjectURL(blob);photo.__dscanBriefUrlResolved=true}
+    const current=String(photo.url||'');
+    /* The input table may already be rendering current blob URLs. Briefing must never revoke them.
+       Reuse a live blob/data URL and only create a URL when the photo has none. */
+    if(blob&&!current){photo.url=URL.createObjectURL(blob);photo.__dscanBriefUrlResolved=true}
+    else if(current){photo.__dscanBriefUrlResolved=true}
   }catch(e){}
   return photo.url||photo.dataUrlCache||'';
 }
@@ -23186,12 +23270,13 @@ else setTimeout(polish,160);
             row.profileId=key;
             row.part=NAMES[key];
             if(row.sourceSession&&typeof row.sourceSession==='object')row.sourceSession.profileId=key;
-            const photos=(ws.photos||[]).filter(p=>String(p.rowIndex)===String(i)).sort((a,b)=>{
+            const allPhotos=(ws.photos||[]).filter(p=>String(p.rowIndex)===String(i)).sort((a,b)=>{
               const ao=Number.isFinite(Number(a?.sortOrder))?Number(a.sortOrder):Number.MAX_SAFE_INTEGER;
               const bo=Number.isFinite(Number(b?.sortOrder))?Number(b.sortOrder):Number.MAX_SAFE_INTEGER;
               if(ao!==bo)return ao-bo;
               return String(a?.id||'').localeCompare(String(b?.id||''));
             });
+            const photos=briefingPhotosForRow(i,allPhotos,row);
             out.push({row,rowIndex:i,photos,linkedPhotos:photos,workspaceKey:key,workspaceOrigin:ws.origin||''});
           });
         });
@@ -23203,7 +23288,8 @@ else setTimeout(polish,160);
       const row=typeof normalizeOperationalRow==='function'?normalizeOperationalRow(raw):raw;
       const key=String(row?.profileId||row?.sourceSession?.profileId||'').trim() ||
         ({'안전':'safety','보건':'health','안전(도급)':'safety_contractor','보건(도급)':'health_contractor'}[row?.part]||'');
-      const photos=typeof linkedPhotosForRow==='function'?linkedPhotosForRow(i):[];
+      const allPhotos=typeof linkedPhotosForRow==='function'?linkedPhotosForRow(i):[];
+      const photos=briefingPhotosForRow(i,allPhotos,row);
       return{row,rowIndex:i,photos,linkedPhotos:photos,workspaceKey:key};
     });
   }
@@ -23693,7 +23779,7 @@ function rowIdentity(r,i){
 function baselineMap(list){
   const m=new Map();(list||[]).forEach((r,i)=>m.set(rowIdentity(r,i),r));return m;
 }
-const MERGE_FIELDS=['criteria','mainText','finding','earnedScore','evaluationScore','scoreValue','evaluationStatus','resultCategory','result','riskType','photoTag','briefingIncluded','sourceLawText','relatedLaws'];
+const MERGE_FIELDS=['criteria','mainText','finding','earnedScore','evaluationScore','scoreValue','evaluationStatus','resultCategory','result','riskType','photoTag','briefingIncluded','briefingPhotoIds','sourceLawText','relatedLaws'];
 async function mergeSameSession(bundle){
   const s=active();if(!s?.id)throw new Error('현재 세션이 없습니다.');
   if(!sameSig(s,bundle.session))throw new Error('안전병합 대상이 아닙니다. 사업장·파트가 다르거나 기술지원 기간이 겹치지 않습니다. 현재 작업을 보호하기 위해 「새 세션으로 가져오기」를 사용해주세요.');
