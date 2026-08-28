@@ -3046,11 +3046,11 @@ html.inspector-authenticated #inspectorLoginOverlay{display:none!important}
   font-size:10.5px!important;box-shadow:none!important;flex:1 1 0!important;
 }
 #tbl .linkedThumbs{margin-top:6px!important;gap:5px!important}
-#tbl .linkedThumb img{width:58px!important;height:44px!important;border-radius:7px!important}
+#tbl .linkedThumb img{display:block!important;width:58px!important;height:44px!important;border-radius:7px!important}
 #tbl .photoRiskCell{min-width:92px!important;text-align:center!important;vertical-align:top!important}
 #tbl .photoRiskCell .photoRiskRowList,#tbl .photoRiskCell .photoRiskEmptyCell{margin-top:75px!important}
 #tbl .photoRiskCell .photoRiskRowList{gap:5px!important}
-#tbl .photoRiskCell .photoRiskRowItem{height:58px!important;min-height:58px!important;box-sizing:border-box!important}
+#tbl .photoRiskCell .photoRiskRowItem{height:58px!important;min-height:58px!important;max-height:58px!important;box-sizing:border-box!important;overflow:hidden!important}
 
 /* ---------- Column widths / rhythm ---------- */
 #editorTbl th:nth-child(1){width:42px}
@@ -4266,10 +4266,24 @@ html.dscan-role-admin .tabbar .dscan-admin-only{
 
 /* Linked thumbnails remain usable inside the slimmer photo column */
 #tbl .auditPhotoConnectCell .linkedThumbs{
-  justify-content:center!important;
+  display:flex!important;
+  flex-direction:column!important;
+  flex-wrap:nowrap!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  gap:5px!important;
 }
 #tbl .auditPhotoConnectCell .linkedThumb{
-  max-width:72px!important;
+  width:58px!important;
+  min-width:58px!important;
+  max-width:58px!important;
+  height:58px!important;
+  min-height:58px!important;
+  max-height:58px!important;
+  box-sizing:border-box!important;
+  display:block!important;
+  line-height:0!important;
+  overflow:visible!important;
 }
 
 /* Existing collapsed-column state must still win over the new widths. */
@@ -6894,7 +6908,7 @@ body:not(.dscan-audit-active) #dscanAuditScrollJump{display:none!important}
 
 <style id="dscan-v4628-field-ux-visual-guard">
 /* v4.6.35 — v4.6.34 rollback precision: No sticky · finding resize · linked hover · health No.33. Canonical scope. */
-.dscan-linked-photo{position:relative;padding-bottom:14px!important;min-width:58px;touch-action:auto}
+.dscan-linked-photo{position:relative!important;width:58px!important;min-width:58px!important;max-width:58px!important;height:58px!important;min-height:58px!important;max-height:58px!important;padding:0 0 14px 0!important;box-sizing:border-box!important;display:block!important;line-height:0!important;touch-action:auto}
 .dscan-linked-photo .dscan-photo-rotate-btn,.dscan-linked-photo .dscan-photo-order-btn{
   position:absolute!important;bottom:2px!important;width:18px!important;height:18px!important;min-width:18px!important;min-height:18px!important;
   padding:0!important;border-radius:5px!important;font-size:11px!important;line-height:1!important;background:rgba(255,255,255,.96)!important;color:#284b72!important;border:1px solid #b9c9dc!important;z-index:8!important;box-shadow:0 1px 4px rgba(18,42,70,.14)!important
@@ -22762,9 +22776,10 @@ ${err?.message||err}`);
 <style id="dscan-v4541-precision-style">
 #tbl.dscan-operational-table th:nth-child(13):not(.dscan-col-collapsed),
 #tbl.dscan-operational-table td:nth-child(13):not(.dscan-col-collapsed){width:76px!important;min-width:76px!important;max-width:76px!important}
-#tbl.dscan-operational-table td:nth-child(13) .briefingToggleLabel{width:54px!important;min-width:54px!important;max-width:54px!important;height:69px!important;min-height:69px!important;box-sizing:border-box!important;flex-direction:column!important}
-#tbl .dscan-brief-photo-picks{display:flex!important;flex-direction:column!important;align-items:center!important;gap:5px!important;margin-top:6px!important}
-#tbl .dscan-brief-photo-pick{width:58px!important;height:58px!important;min-width:58px!important;min-height:58px!important;box-sizing:border-box!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:5px!important;border:1px solid #ccd9e8!important;border-radius:7px!important;background:#f7faff!important;cursor:pointer!important;position:relative!important}
+#tbl.dscan-operational-table td:nth-child(13){vertical-align:top!important}
+#tbl.dscan-operational-table td:nth-child(13) .briefingToggleLabel{width:54px!important;min-width:54px!important;max-width:54px!important;height:69px!important;min-height:69px!important;max-height:69px!important;box-sizing:border-box!important;flex-direction:column!important;margin:0 auto!important}
+#tbl .dscan-brief-photo-picks{display:flex!important;flex-direction:column!important;flex-wrap:nowrap!important;align-items:center!important;justify-content:flex-start!important;gap:5px!important;margin-top:6px!important}
+#tbl .dscan-brief-photo-pick{width:58px!important;height:58px!important;min-width:58px!important;min-height:58px!important;max-width:58px!important;max-height:58px!important;box-sizing:border-box!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:5px!important;border:1px solid #ccd9e8!important;border-radius:7px!important;background:#f7faff!important;cursor:pointer!important;position:relative!important;overflow:hidden!important}
 #tbl .dscan-brief-photo-pick input{width:16px!important;height:16px!important;margin:0!important;accent-color:#2459b6!important;cursor:pointer!important}
 #tbl .dscan-brief-photo-pick span{font-size:15px!important;font-weight:900!important;line-height:1!important;color:#24559a!important}
 #tbl .dscan-brief-photo-pick:has(input:checked){background:#edf5ff!important;border-color:#91b3df!important;box-shadow:inset 0 0 0 1px rgba(36,89,182,.08)!important}
