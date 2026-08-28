@@ -959,6 +959,15 @@
     margin-top:18px;
   }
   .law-detail-actions button{flex:0 0 auto}
+  #tab-briefing .law-detail-overlay .law-detail-modal{background:#fff!important;color:var(--text)!important;border-color:var(--border)!important}
+  #tab-briefing .law-detail-overlay .law-detail-head{background:rgba(255,255,255,.96)!important;border-bottom-color:var(--border)!important}
+  #tab-briefing .law-detail-overlay .law-detail-title{color:#123b7c!important}
+  #tab-briefing .law-detail-overlay .law-detail-label,#tab-briefing .law-detail-overlay .small{color:var(--text-soft)!important}
+  #tab-briefing .law-detail-overlay .law-detail-text{color:#26354b!important}
+  #tab-briefing .law-detail-overlay .law-detail-rel{background:#f8faff!important;color:#26354b!important;border-color:#dbe5f2!important}
+  #tab-briefing .law-detail-overlay .law-detail-rel b{color:#123b7c!important}
+  #tab-briefing .law-detail-overlay button{background:#fff!important;color:#34475e!important;border-color:var(--border-strong)!important;box-shadow:var(--shadow-xs)!important}
+  #tab-briefing .law-detail-overlay button:hover{background:#f7f9fc!important;color:#223952!important;border-color:#b7c4d2!important}
   .law-selected-item{cursor:pointer}
   .law-selected-item:hover{border-color:#8db2e8;box-shadow:0 4px 14px rgba(47,99,214,.10)}
   .law-selected-item .law-selected-remove{cursor:pointer}
@@ -2214,6 +2223,12 @@ body.mobile-photo-dragging{
   padding:8px 12px;border-top:1px solid #e5ebf1;background:#fff;
   font-size:9.5px;color:#728096;
 }
+#tab-briefing .law-cartoon-overlay .law-cartoon-modal{background:#fff!important;color:#172b42!important}
+#tab-briefing .law-cartoon-overlay .law-cartoon-head,#tab-briefing .law-cartoon-overlay .law-cartoon-toolbar,#tab-briefing .law-cartoon-overlay .law-cartoon-foot{background:#fff!important;color:#172b42!important}
+#tab-briefing .law-cartoon-overlay .law-cartoon-title{color:#172b42!important}
+#tab-briefing .law-cartoon-overlay .small,#tab-briefing .law-cartoon-overlay .law-cartoon-foot{color:#728096!important}
+#tab-briefing .law-cartoon-overlay button{background:#fff!important;color:#34475e!important;border-color:#cbd5df!important}
+#tab-briefing .law-cartoon-overlay button:hover{background:#f7f9fc!important;color:#223952!important}
 @media(max-width:900px){
   .law-cartoon-overlay{padding:6px}
   .law-cartoon-modal{width:100%;height:96vh;border-radius:13px}
@@ -3032,7 +3047,8 @@ html.inspector-authenticated #inspectorLoginOverlay{display:none!important}
 }
 #tbl .linkedThumbs{margin-top:6px!important;gap:5px!important}
 #tbl .linkedThumb img{width:58px!important;height:44px!important;border-radius:7px!important}
-#tbl .photoRiskCell{min-width:92px!important;text-align:center!important}
+#tbl .photoRiskCell{min-width:92px!important;text-align:center!important;vertical-align:top!important}
+#tbl .photoRiskCell .photoRiskRowList,#tbl .photoRiskCell .photoRiskEmptyCell{margin-top:69px!important}
 
 /* ---------- Column widths / rhythm ---------- */
 #editorTbl th:nth-child(1){width:42px}
@@ -4373,8 +4389,8 @@ html.dscan-role-admin .tabbar .dscan-admin-only{
   margin-top:3px;
 }
 .dscan-brief-date-input{
-  width:230px!important;
-  max-width:40vw!important;
+  width:clamp(360px,42vw,640px)!important;
+  max-width:64vw!important;
   min-height:30px!important;
   height:30px!important;
   padding:4px 7px!important;
@@ -6852,6 +6868,55 @@ body:not(.dscan-audit-active) #dscanAuditScrollJump{display:none!important}
 }
 </style>
 
+<style id="dscan-v4628-field-ux-visual-guard">
+/* v4.6.31 — photo controls/briefing readability canonical refinement. Logic-neutral visual scope. */
+.dscan-linked-photo{position:relative;padding-bottom:14px!important;min-width:58px}
+.dscan-linked-photo .dscan-photo-rotate-btn,.dscan-linked-photo .dscan-photo-order-btn{
+  position:absolute!important;bottom:2px!important;width:18px!important;height:18px!important;min-width:18px!important;min-height:18px!important;
+  padding:0!important;border-radius:5px!important;font-size:11px!important;line-height:1!important;background:rgba(255,255,255,.96)!important;color:#284b72!important;border:1px solid #b9c9dc!important;z-index:8!important;box-shadow:0 1px 4px rgba(18,42,70,.14)!important
+}
+.dscan-linked-photo .dscan-photo-order-btn.prev{left:1px!important}.dscan-linked-photo .dscan-photo-rotate-btn{left:20px!important}.dscan-linked-photo .dscan-photo-order-btn.next{left:39px!important}
+.dscan-linked-photo .dscan-photo-order-btn:disabled{opacity:.28!important;cursor:default!important}
+.dscan-unlinked-rotate-btn{position:absolute!important;right:3px!important;bottom:3px!important;width:20px!important;height:20px!important;min-width:20px!important;min-height:20px!important;padding:0!important;border-radius:999px!important;background:rgba(255,255,255,.92)!important;color:#284b72!important;border:1px solid rgba(184,201,220,.95)!important;z-index:6!important;font-size:12px!important}
+.dscan-brief-rotate-btn{font-size:18px!important;min-width:38px!important;padding-left:9px!important;padding-right:9px!important}
+
+/* Cover: slightly stronger title/subtitle/CI/meta without changing layout structure. */
+#tab-briefing #dscanBriefCover .dscan-cover-ci{min-width:178px!important;max-width:270px!important;min-height:64px!important;padding:10px 14px!important}
+#tab-briefing #dscanBriefCover .dscan-cover-ci img{max-width:240px!important;max-height:50px!important}
+#tab-briefing #dscanBriefCover h1{font-size:clamp(40px,5.6vw,76px)!important}
+#tab-briefing #dscanBriefCover h2{font-size:clamp(22px,2.3vw,33px)!important}
+#tab-briefing .dscan-brief-cover-meta{font-size:16px!important;font-weight:800!important}
+#tab-briefing .dscan-brief-cover-meta b,#tab-briefing .dscan-brief-date-input{font-size:20px!important;font-weight:900!important}
+
+/* Summary: presentation readability. */
+#tab-briefing #dscanBriefSummary .dscan-summary-title h2{font-size:32px!important}
+#tab-briefing #dscanBriefSummary .dscan-summary-title span{font-size:14px!important}
+#tab-briefing #dscanBriefSummary .dscan-summary-kpi span{font-size:13px!important}
+#tab-briefing #dscanBriefSummary .dscan-summary-kpi b{font-size:38px!important}
+#tab-briefing #dscanBriefSummary .dscan-summary-part span{font-size:12px!important}
+#tab-briefing #dscanBriefSummary .dscan-summary-part b{font-size:20px!important}
+#tab-briefing #dscanBriefSummary .dscan-summary-part small{font-size:11px!important}
+#tab-briefing .dscan-core-risk-title b{font-size:14px!important}
+#tab-briefing .dscan-core-risk-title span{font-size:11px!important}
+#tab-briefing .dscan-core-risk-name{font-size:12px!important}
+#tab-briefing .dscan-core-risk-value,#tab-briefing .dscan-core-risk-value b{font-size:11px!important}
+
+/* Part briefing: KPI and key text larger; linked-item navigator deliberately smaller. */
+#tab-briefing .dscan-part-brief-kpi .part-head b{font-size:15px!important}
+#tab-briefing .dscan-part-kpi-cell span{font-size:11px!important;font-weight:800!important}
+#tab-briefing .dscan-part-kpi-cell b{font-size:22px!important}
+#tab-briefing .metaPanel .dscan-main-point-label{font-size:13px!important}
+#tab-briefing .metaPanel .dscan-main-point{font-size:26px!important;line-height:1.58!important;padding:18px 20px!important;font-weight:800!important;letter-spacing:-.02em!important}
+#tab-briefing #briefingList{font-size:9.5px!important;line-height:1.28!important}
+#tab-briefing #briefingList .dscan-brief-list-item{font-size:9.5px!important;padding:6px 8px!important;line-height:1.28!important}
+
+/* Toolbar must remain fixed/visible in briefing; all autohide transforms are neutralized. */
+#tab-briefing #briefingToolbarProtected,#tab-briefing:fullscreen #briefingToolbarProtected,#tab-briefing:-webkit-full-screen #briefingToolbarProtected{transform:none!important;opacity:1!important;pointer-events:auto!important;position:sticky!important;top:0!important;z-index:10020!important}
+#tab-briefing.briefing-toolbar-hidden #briefingToolbarProtected,#tab-briefing.briefing-autohide-active #briefingToolbarProtected.dscan-brief-toolbar-hidden{transform:none!important;opacity:1!important;pointer-events:auto!important}
+
+/* Fullscreen law popup lives inside the fullscreen briefing root when opened. */
+#tab-briefing:fullscreen .law-detail-overlay,#tab-briefing:-webkit-full-screen .law-detail-overlay{position:fixed!important;inset:0!important;z-index:2147483600!important}
+</style>
 </head>
 <body>
 
@@ -7489,6 +7554,7 @@ body:not(.dscan-audit-active) #dscanAuditScrollJump{display:none!important}
       <button onclick="nextItem()">다음 항목</button>
       <button onclick="prevPhotoInItem()">← 사진</button>
       <button onclick="nextPhotoInItem()">사진 →</button>
+      <button type="button" id="briefRotateBtn" class="dscan-brief-rotate-btn" title="현재 사진 90° 회전" aria-label="현재 사진 90도 회전" onclick="rotateCurrentBriefingPhoto()">↻</button>
       <button id="briefMoveBtn" onclick="setTool('move')">이동</button>
       <button id="briefLaserBtn" onclick="setTool('laser')">레이저</button>
 
@@ -8585,7 +8651,7 @@ function renderRows(){
         <input class="hiddenInput" id="cameraInput_${i}" type="file" accept="image/*" capture="environment" onchange="attachFilesToRow(event, ${i}, true)">
         <input class="hiddenInput" id="galleryInput_${i}" type="file" accept="image/*" multiple onchange="attachFilesToRow(event, ${i}, false)">
         <div class="linkedThumbs">
-          ${linkedPhotosForRow(i).map(p=>`<div class="linkedThumb"><img src="${p.url}" title="${p.name}"><button class="unlinkBtn" onclick="unlinkPhoto('${p.id}')">×</button></div>`).join('')}
+          ${linkedPhotosForRow(i).map((p,pi,arr)=>`<div class="linkedThumb dscan-linked-photo"><img src="${p.url}" title="${p.name}"><button class="unlinkBtn" title="연결 해제" onclick="unlinkPhoto('${p.id}')">×</button><button type="button" class="dscan-photo-rotate-btn" title="90° 회전" onclick="event.stopPropagation();rotatePhoto90('${p.id}')">↻</button><button type="button" class="dscan-photo-order-btn prev" title="사진 순서 앞으로 이동" aria-label="사진 순서 앞으로 이동" ${pi===0?'disabled':''} onclick="event.stopPropagation();moveLinkedPhoto('${p.id}',-1)">‹</button><button type="button" class="dscan-photo-order-btn next" title="사진 순서 뒤로 이동" aria-label="사진 순서 뒤로 이동" ${pi===arr.length-1?'disabled':''} onclick="event.stopPropagation();moveLinkedPhoto('${p.id}',1)">›</button></div>`).join('')}
         </div>
       </td>
       <td class="photoRiskCell">
@@ -8680,7 +8746,7 @@ async function attachFilesToRow(event, rowIndex, isCamera){
         id:`ROW${rowIndex}_${Date.now()}_${idx}`,
         file, blob:file,
         name:file.name || `capture_${Date.now()}_${idx}.jpg`,
-        url, rowIndex:String(rowIndex),
+        url, rowIndex:String(rowIndex), sortOrder:nextPhotoSortOrder(rowIndex),
         dataUrlCache, riskStatus:'ready', riskAnalysis:null, riskError:''
       });
       updateProgress(idx+1, files.length, `${idx+1}/${files.length}장 연결 중`);
@@ -8699,7 +8765,76 @@ async function attachFilesToRow(event, rowIndex, isCamera){
 
 
 
-function linkedPhotosForRow(rowIndex){ return photos.filter(p=>String(p.rowIndex)===String(rowIndex)); }
+function linkedPhotosForRow(rowIndex){
+  return photos.filter(p=>String(p.rowIndex)===String(rowIndex)).sort((a,b)=>{
+    const ao=Number.isFinite(Number(a?.sortOrder))?Number(a.sortOrder):Number.MAX_SAFE_INTEGER;
+    const bo=Number.isFinite(Number(b?.sortOrder))?Number(b.sortOrder):Number.MAX_SAFE_INTEGER;
+    if(ao!==bo)return ao-bo;
+    return String(a?.id||'').localeCompare(String(b?.id||''));
+  });
+}
+function nextPhotoSortOrder(rowIndex){
+  const list=photos.filter(p=>String(p.rowIndex)===String(rowIndex));
+  return list.reduce((m,p)=>Math.max(m,Number.isFinite(Number(p.sortOrder))?Number(p.sortOrder):-1),-1)+1;
+}
+async function persistPhotoMutation(){
+  try{
+    const ses=(typeof getCurrentInspectionSession==='function'?getCurrentInspectionSession():null)||(typeof currentSession==='function'?currentSession():null);
+    if(ses?.id&&window.DSCANPhotoPersistence?.persist)await window.DSCANPhotoPersistence.persist(ses.id);
+  }catch(e){console.error('[DSCAN photo mutation persist]',e)}
+}
+async function moveLinkedPhoto(photoId,direction){
+  const p=photos.find(x=>String(x.id)===String(photoId));if(!p||p.rowIndex===''||p.rowIndex==null)return;
+  const list=linkedPhotosForRow(p.rowIndex);const idx=list.findIndex(x=>String(x.id)===String(photoId));
+  const target=idx+(direction<0?-1:1);if(idx<0||target<0||target>=list.length)return;
+  list.forEach((x,i)=>x.sortOrder=i);
+  const a=list[idx],b=list[target];const tmp=a.sortOrder;a.sortOrder=b.sortOrder;b.sortOrder=tmp;
+  await persistPhotoMutation();
+  renderRows();renderPhotosHub();rebuildBriefingItems();renderBriefingList();
+  try{if(typeof loadCurrentBriefingPhoto==='function'&&document.getElementById('tab-briefing')?.classList.contains('active'))loadCurrentBriefingPhoto()}catch(e){}
+  log(`연결사진 순서 변경: ${idx+1} → ${target+1}`);
+}
+async function rotatePhoto90(photoId){
+  let p=photos.find(x=>String(x.id)===String(photoId));
+  if(!p){
+    try{
+      const spaces=window.getAggregatedPartWorkspaces?.()||{};
+      for(const ws of Object.values(spaces)){const found=(ws?.photos||[]).find(x=>String(x.id)===String(photoId));if(found){p=found;break;}}
+    }catch(e){}
+  }
+  if(!p)return;
+  showProgress('사진 회전 중',p.name||'사진 준비 중');
+  try{
+    let blob=p.blob||p.file||null;
+    if(!blob&&p.url){const res=await fetch(p.url);blob=await res.blob();}
+    if(!blob)throw new Error('사진 원본을 찾을 수 없습니다.');
+    let bitmap=null;
+    try{bitmap=await createImageBitmap(blob);}catch(e){
+      const data=await blobToDataUrl(blob);bitmap=await new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>resolve(im);im.onerror=reject;im.src=data;});
+    }
+    const w=bitmap.width||bitmap.naturalWidth,h=bitmap.height||bitmap.naturalHeight;
+    const canvas=document.createElement('canvas');canvas.width=h;canvas.height=w;
+    const ctx=canvas.getContext('2d');ctx.translate(h,0);ctx.rotate(Math.PI/2);ctx.drawImage(bitmap,0,0,w,h);
+    const mime=(blob.type==='image/png')?'image/png':'image/jpeg';
+    const rotated=await new Promise((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(new Error('회전 이미지 생성 실패')),mime,mime==='image/jpeg'?0.95:undefined));
+    if(bitmap?.close)try{bitmap.close()}catch(e){}
+    if(String(p.url||'').startsWith('blob:'))try{URL.revokeObjectURL(p.url)}catch(e){}
+    p.blob=rotated;p.file=null;p.url=URL.createObjectURL(rotated);p.rotation=((Number(p.rotation)||0)+90)%360;
+    try{p.dataUrlCache=await blobToDataUrl(rotated)}catch(e){p.dataUrlCache=''}
+    await persistPhotoMutation();
+    renderRows();renderPhotosHub();rebuildBriefingItems();renderBriefingList();
+    try{if(typeof loadCurrentBriefingPhoto==='function'&&document.getElementById('tab-briefing')?.classList.contains('active'))await loadCurrentBriefingPhoto()}catch(e){}
+    completeProgress('사진을 90° 회전하여 저장했습니다.');
+    log(`사진 회전 저장 완료: ${p.name||photoId}`);
+  }catch(e){console.error(e);alert('사진 회전 오류: '+(e?.message||e));}
+  finally{hideProgress(450)}
+}
+async function rotateCurrentBriefingPhoto(){
+  const item=briefingItems?.[currentItemIndex];const p=item?.linkedPhotos?.[currentPhotoIndex];
+  if(!p){try{showDscanToast('현재 강평 사진이 없습니다.')}catch(e){};return;}
+  await rotatePhoto90(p.id);
+}
+window.moveLinkedPhoto=moveLinkedPhoto;window.rotatePhoto90=rotatePhoto90;window.rotateCurrentBriefingPhoto=rotateCurrentBriefingPhoto;
 function unlinkPhoto(photoId){ hideHoverPreview(); const p=photos.find(x=>x.id===photoId); if(p){ p.rowIndex=''; renderRows(); renderPhotosHub(); rebuildBriefingItems(); renderBriefingList(); log('사진 연결 해제 완료'); } }
 
 
@@ -8714,7 +8849,7 @@ async function importPhotosAsUnlinked(event){
       let dataUrlCache='';
       // 너무 큰 파일에서 메모리 부담을 줄이기 위해 dataUrlCache는 실패해도 계속 진행
       try{ dataUrlCache = await blobToDataUrl(file); }catch(e){ console.warn('사진 캐시 생성 실패', e); }
-      photos.push({id:`UP${Date.now()}_${idx}`,file,blob:file,name:file.name,url,rowIndex:'',dataUrlCache,riskStatus:'ready',riskAnalysis:null,riskError:''});
+      photos.push({id:`UP${Date.now()}_${idx}`,file,blob:file,name:file.name,url,rowIndex:'',sortOrder:idx,rotation:0,dataUrlCache,riskStatus:'ready',riskAnalysis:null,riskError:''});
       updateProgress(idx+1, files.length, `${idx+1}/${files.length}장 불러오는 중`);
       await nextFrame();
     }
@@ -9055,6 +9190,7 @@ function renderPhotosHub(){
           <span class="photoOverlayName">${escapeHtml(p.name||'사진')}</span>
           <span class="photoRiskDot ${photoRiskStatusClass(p)}" title="${photoRiskStatusLabel(p)}" aria-label="${photoRiskStatusLabel(p)}"></span>
         </div>
+        <button type="button" class="dscan-unlinked-rotate-btn" title="사진 90° 회전" aria-label="사진 90도 회전" onclick="event.stopPropagation();rotatePhoto90('${p.id}')">↻</button>
       </div>
       <div class="tileActions photoTileConnectRow compactTileActions">
         <select title="기술지원항목 직접연결" onchange="directConnectPhoto('${p.id}', this.value)">
@@ -9079,7 +9215,7 @@ function renderPhotosHub(){
       <div class="small" style="margin-top:6px">${r.mainText||'주요내용 없음'}</div>
       ${fieldDefs.length ? `<div class="small" style="margin-top:6px">${fieldDefs.map(fd=>`${fd.label}: ${formatFieldValueForText(fd, r.extras?.[fd.id])}`).join(' / ')}</div>` : ''}
       <div class="linkedThumbs">
-        ${linkedPhotosForRow(idx).map(p=>`<div class="linkedThumb"><img src="${p.url}" title="${p.name}"><button class="unlinkBtn" onclick="unlinkPhoto('${p.id}')">×</button></div>`).join('')||''}
+        ${linkedPhotosForRow(idx).map((p,pi,arr)=>`<div class="linkedThumb dscan-linked-photo"><img src="${p.url}" title="${p.name}"><button class="unlinkBtn" title="연결 해제" onclick="unlinkPhoto('${p.id}')">×</button><button type="button" class="dscan-photo-rotate-btn" title="90° 회전" onclick="event.stopPropagation();rotatePhoto90('${p.id}')">↻</button><button type="button" class="dscan-photo-order-btn prev" title="앞으로 이동" ${pi===0?'disabled':''} onclick="event.stopPropagation();moveLinkedPhoto('${p.id}',-1)">‹</button><button type="button" class="dscan-photo-order-btn next" title="뒤로 이동" ${pi===arr.length-1?'disabled':''} onclick="event.stopPropagation();moveLinkedPhoto('${p.id}',1)">›</button></div>`).join('')||''}
       </div>
     </div>
   `).join('');
@@ -9319,7 +9455,7 @@ function directConnectPhoto(photoId, rowIndex){
   hideHoverPreview();
   if(rowIndex==='' || rowIndex===null || rowIndex===undefined) return;
   const p=photos.find(x=>x.id===photoId);
-  if(p){ p.rowIndex=String(rowIndex); renderRows(); renderPhotosHub(); rebuildBriefingItems(); renderBriefingList(); log(`${Number(rowIndex)+1}행에 직접연결 완료`); }
+  if(p){ p.rowIndex=String(rowIndex); p.sortOrder=nextPhotoSortOrder(rowIndex); renderRows(); renderPhotosHub(); rebuildBriefingItems(); renderBriefingList(); log(`${Number(rowIndex)+1}행에 직접연결 완료`); }
 }
 function deletePhoto(photoId){
   cancelMobilePhotoDrag();
@@ -9740,7 +9876,9 @@ function buildSessionObject(){
       archivePath,
       riskStatus:p.riskStatus||'ready',
       riskAnalysis:p.riskAnalysis||null,
-      riskError:p.riskError||''
+      riskError:p.riskError||'',
+      sortOrder:Number.isFinite(Number(p.sortOrder))?Number(p.sortOrder):idx,
+      rotation:Number(p.rotation||0)
     };
   });
 
@@ -9770,6 +9908,8 @@ function buildSessionObject(){
 }
 async function createSessionZipBlobAndName(){
   const zip = new JSZip();
+  showProgress('ZIP 저장 준비','연결 사진과 세션 데이터를 검증하는 중입니다.');
+  await nextFrame();
 
   /* FINAL ZIP PHOTO CANONICALIZATION
      Final ZIP must never depend only on the transient global `photos` array.
@@ -9811,7 +9951,25 @@ async function createSessionZipBlobAndName(){
   let savedPhotoCount=0;
   let linkedCount=0;
 
+  const expectedPhotoCount=session.photos.length;
+  const exportSessionForPhotoCheck=(typeof getCurrentInspectionSession==='function'?getCurrentInspectionSession():null);
+  const exportIsFinal=!!(exportSessionForPhotoCheck&&(exportSessionForPhotoCheck.locked===true||exportSessionForPhotoCheck.status==='완료'||exportSessionForPhotoCheck.status==='완료·LOCK'));
+  if(expectedPhotoCount===0){
+    hideProgress(0);
+    const ok=confirm(
+      `현재 연결된 사진이 한 장도 없습니다.\n\n`+
+      `이 ${exportIsFinal?'최종 ZIP':'중간저장 ZIP'}에는 사진이 포함되지 않습니다.\n`+
+      `사진 없이 그대로 저장하시겠습니까?`
+    );
+    if(!ok)throw new Error('사진 없는 ZIP 저장을 사용자가 취소했습니다.');
+    showProgress('ZIP 저장 준비','사진 없음 확인 완료 · 세션 데이터를 검증하는 중입니다.');
+    await nextFrame();
+  }
+  let processedPhotoCount=0;
   for(const meta of session.photos){
+    processedPhotoCount++;
+    updateProgress(processedPhotoCount,Math.max(1,expectedPhotoCount),`사진 검증 ${processedPhotoCount}/${expectedPhotoCount} · ${meta.name||''}`);
+    await nextFrame();
     const p=photos.find(x=>String(x.id)===String(meta.id));
     if(!p)continue;
     let blob=p.blob;
@@ -9860,7 +10018,14 @@ async function createSessionZipBlobAndName(){
     caseLibrarySnapshot:!!session.legalCaseLibrary
   },null,2));
 
+  const archivePhotoEntries=Object.keys(zip.files).filter(n=>n.startsWith('photos/linked/')&&!zip.files[n].dir).length;
+  if(savedPhotoCount!==expectedPhotoCount||archivePhotoEntries!==expectedPhotoCount){
+    throw new Error(`사진 포함 검증 실패: 연결 ${expectedPhotoCount}장 중 ZIP 준비 ${archivePhotoEntries}장입니다. 사진 복원 후 다시 저장해 주세요.`);
+  }
+  updateProgress(Math.max(1,expectedPhotoCount),Math.max(1,expectedPhotoCount),'ZIP 압축 파일을 생성하는 중입니다.');
   const blob=await zip.generateAsync({type:'blob'});
+  if(!(blob instanceof Blob)||blob.size<1024)throw new Error('ZIP 파일 생성 검증에 실패했습니다.');
+  completeProgress(`ZIP 검증 완료 · 사진 ${expectedPhotoCount}장 포함 · ${(blob.size/1024/1024).toFixed(1)}MB`);
   const exportSession=(typeof getCurrentInspectionSession==='function'?getCurrentInspectionSession():null);
   const isFinal=!!(exportSession&&(exportSession.locked===true||exportSession.status==='완료'||exportSession.status==='완료·LOCK'));
 
@@ -9899,13 +10064,17 @@ async function createSessionZipBlobAndName(){
   return {blob,name,linkedCount,savedPhotoCount,isFinal};
 }
 async function exportSessionZip(){
-  const {blob, name, linkedCount, savedPhotoCount, isFinal} = await createSessionZipBlobAndName();
-  lastExportedZipName = name;
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download=name;
-  document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove();}, 500);
-  log(`${isFinal?'최종본':'중간저장'} ZIP 생성 완료: ${name} / 연결사진 ${linkedCount}장 / 강평선택 ${rows.filter(r=>r.briefingIncluded!==false).length}행 / 위험분석 결과 포함`);
+  try{
+    const {blob, name, linkedCount, savedPhotoCount, isFinal} = await createSessionZipBlobAndName();
+    lastExportedZipName = name;
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);a.download=name;
+    document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);
+    log(`${isFinal?'최종본':'중간저장'} ZIP 생성 완료: ${name} / 연결사진 ${linkedCount}장 / 실제포함 ${savedPhotoCount}장 / 강평선택 ${rows.filter(r=>r.briefingIncluded!==false).length}행`);
+  }catch(e){
+    console.error('[DSCAN ZIP verified export]',e);
+    alert('ZIP 저장을 중단했습니다.\n'+(e?.message||e));
+  }finally{hideProgress(650)}
 }
 async function sendSessionZipByEmail(){
   const inspector=(typeof getCurrentInspector==='function'?getCurrentInspector():window.SHE_CURRENT_INSPECTOR);
@@ -9922,18 +10091,23 @@ async function sendSessionZipByEmail(){
     return;
   }
 
-  const {blob, name, isFinal} = await createSessionZipBlobAndName();
-  lastExportedZipName = name;
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download=name;
-  document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove();}, 500);
+  try{
+      const {blob, name, isFinal} = await createSessionZipBlobAndName();
+      lastExportedZipName = name;
+      const a=document.createElement('a');
+      a.href=URL.createObjectURL(blob);
+      a.download=name;
+      document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove();}, 500);
 
-  const ses=(typeof currentSession==='function'?currentSession():null); const subject = `[DSCAN] ${ses?.site||'사업장'} ${ses?.checklistProfileName||ses?.part||''} 기술지원 ${isFinal?'최종본':'중간저장본'}`;
-  const body = `DSCAN 기술지원 ${isFinal?'최종본':'중간저장본'}입니다.\n사업장: ${ses?.site||'-'}\n파트: ${ses?.checklistProfileName||ses?.part||'-'}\n기술지원자: ${inspector.name||'-'}${inspector.rank?' '+inspector.rank:''}\n사번: ${inspector.empNo||'-'}\n\n저장된 "${name}" 파일을 이 메일에 첨부해 주세요.`;
-  const mailto = `mailto:${encodeURIComponent(recipient)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-  window.location.href = mailto;
-  log(`메일 작성창 열기 완료: ${name} 저장 후 로그인 기술지원자 ${inspector.name||inspector.empNo}의 이메일(${recipient})을 수신자로 열었습니다.`);
+      const ses=(typeof currentSession==='function'?currentSession():null); const subject = `[DSCAN] ${ses?.site||'사업장'} ${ses?.checklistProfileName||ses?.part||''} 기술지원 ${isFinal?'최종본':'중간저장본'}`;
+      const body = `DSCAN 기술지원 ${isFinal?'최종본':'중간저장본'}입니다.\n사업장: ${ses?.site||'-'}\n파트: ${ses?.checklistProfileName||ses?.part||'-'}\n기술지원자: ${inspector.name||'-'}${inspector.rank?' '+inspector.rank:''}\n사번: ${inspector.empNo||'-'}\n\n저장된 "${name}" 파일을 이 메일에 첨부해 주세요.`;
+      const mailto = `mailto:${encodeURIComponent(recipient)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      window.location.href = mailto;
+      log(`메일 작성창 열기 완료: ${name} 저장 후 로그인 기술지원자 ${inspector.name||inspector.empNo}의 이메일(${recipient})을 수신자로 열었습니다.`);
+  }catch(e){
+    console.error('[DSCAN ZIP mail verified export]',e);
+    alert('ZIP 저장을 중단했습니다.\n'+(e?.message||e));
+  }finally{hideProgress(650)}
 }
 function normalizeImportedRow(r){
   return ensureRowExtras({
@@ -9975,7 +10149,9 @@ async function restorePhotoFromSessionMeta(zip,p,indexSuffix=''){
     blob,file:null,url,dataUrlCache,
     riskStatus:p.riskStatus||(p.riskAnalysis?'done':'ready'),
     riskAnalysis:p.riskAnalysis||null,
-    riskError:p.riskError||''
+    riskError:p.riskError||'',
+    sortOrder:Number.isFinite(Number(p.sortOrder))?Number(p.sortOrder):Number(indexSuffix)||0,
+    rotation:Number(p.rotation||0)
   };
 }
 
@@ -12656,93 +12832,14 @@ body.briefing-mode-active #tab-briefing .viewerStage{
 </style>
 <script id="briefing-fullscreen-toolbar-autohide-script">
 (function(){
-  const HIDE_DELAY = 1000;
-  let hideTimer = 0;
-  let fullscreenActive = false;
-
-  function tab(){ return document.getElementById('tab-briefing'); }
-  function toolbar(){ return tab()?.querySelector(':scope > .card:first-child'); }
-
-  function clearHideTimer(){
-    if(hideTimer){
-      clearTimeout(hideTimer);
-      hideTimer = 0;
-    }
+  'use strict';
+  function keepVisible(){
+    const tab=document.getElementById('tab-briefing');const bar=document.getElementById('briefingToolbarProtected');
+    if(tab)tab.classList.remove('briefing-autohide-active','briefing-toolbar-hidden','briefing-toolbar-visible');
+    if(bar)bar.classList.remove('dscan-brief-toolbar-hidden','dscan-brief-toolbar-visible');
   }
-
-  function isBriefingFullscreen(){
-    const panel = tab();
-    const fs = document.fullscreenElement || document.webkitFullscreenElement;
-    return !!panel && fs === panel;
-  }
-
-  function showToolbar(scheduleHide){
-    const panel = tab();
-    if(!panel) return;
-    panel.classList.remove('briefing-toolbar-hidden');
-    panel.classList.add('briefing-toolbar-visible');
-    clearHideTimer();
-    if(scheduleHide && fullscreenActive){
-      hideTimer = setTimeout(hideToolbar, HIDE_DELAY);
-    }
-  }
-
-  function hideToolbar(){
-    hideTimer = 0;
-    if(!fullscreenActive || !isBriefingFullscreen()) return;
-    const bar = toolbar();
-    const focused = document.activeElement;
-    const interacting = bar && (
-      bar.matches(':hover') ||
-      (focused && bar.contains(focused))
-    );
-    if(interacting){
-      showToolbar(true);
-      return;
-    }
-    const panel = tab();
-    if(!panel) return;
-    panel.classList.remove('briefing-toolbar-visible');
-    panel.classList.add('briefing-toolbar-hidden');
-  }
-
-  function registerActivity(){
-    if(!fullscreenActive) return;
-    showToolbar(true);
-  }
-
-  function syncFullscreenState(){
-    fullscreenActive = isBriefingFullscreen();
-    clearHideTimer();
-    const panel = tab();
-    if(!panel) return;
-    panel.classList.remove('briefing-toolbar-hidden','briefing-toolbar-visible');
-    if(fullscreenActive){
-      showToolbar(true);
-    }
-  }
-
-  document.addEventListener('fullscreenchange', syncFullscreenState);
-  document.addEventListener('webkitfullscreenchange', syncFullscreenState);
-
-  /* 스크롤은 캡처 단계에서 감지하여 tab 내부 스크롤도 빠짐없이 복원 */
-  document.addEventListener('scroll', registerActivity, true);
-  document.addEventListener('wheel', registerActivity, {passive:true, capture:true});
-  document.addEventListener('pointermove', registerActivity, {passive:true, capture:true});
-  document.addEventListener('pointerdown', registerActivity, {passive:true, capture:true});
-  document.addEventListener('touchstart', registerActivity, {passive:true, capture:true});
-  document.addEventListener('touchmove', registerActivity, {passive:true, capture:true});
-  document.addEventListener('keydown', registerActivity, true);
-
-  document.addEventListener('focusin', function(e){
-    const bar = toolbar();
-    if(fullscreenActive && bar && bar.contains(e.target)) showToolbar(false);
-  }, true);
-  document.addEventListener('focusout', function(){
-    if(fullscreenActive) showToolbar(true);
-  }, true);
-
-  syncFullscreenState();
+  document.addEventListener('fullscreenchange',keepVisible);
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',keepVisible,{once:true});else keepVisible();
 })();
 </script>
 
@@ -13350,7 +13447,7 @@ body.briefing-mode-active #tab-briefing .viewerStage{
       const primary=a ? label(a) : (x.primaryLabel||x.primaryId||'관계법령');
       const linked=(x.linkedIds||[]).map(id=>indexById.get(id)).filter(Boolean);
       const isManual=!!x.manual || !a;
-      return `<div class="law-selected-item${isManual?' manual-law':''}" ${isManual?'':`title="클릭하여 법령 상세보기" onclick="SHELegal.openLawDetail('${x.primaryId}')"`} >
+      return `<div class="law-selected-item${isManual?' manual-law':''}" title="클릭하여 법령 상세보기" onclick="SHELegal.openRowLawDetail(${i},${idx})">
         <span class="law-selected-primary">${escapeHtml(primary)}${isManual?'<span class="law-selected-manual-badge">직접입력</span>':''}</span>
         <button type="button" class="law-selected-remove" title="이 조항 삭제" aria-label="이 조항 삭제" onclick="event.stopPropagation();SHELegal.removeLaw(${i},${idx})">×</button>
       </div>`;
@@ -13361,6 +13458,13 @@ body.briefing-mode-active #tab-briefing .viewerStage{
     if(box?.classList.contains('open')){
       renderSuggestions(i, r.mainText||'', true);
     }
+  }
+
+  function openRowLawDetail(rowIndex,lawIndex){
+    const r=getRows()[Number(rowIndex)];
+    const ref=Array.isArray(r?.relatedLaws)?r.relatedLaws[Number(lawIndex)]:null;
+    if(!ref)return false;
+    return openLawDetailRef(ref);
   }
 
   function renderAllRowLawCells(){
@@ -13846,13 +13950,21 @@ body.briefing-mode-active #tab-briefing .viewerStage{
       lawOverlay.style.pointerEvents='none';
     }
 
-    if(overlay)overlay.classList.add('open');
+    if(overlay){
+      const brief=document.getElementById('tab-briefing');
+      const fs=document.fullscreenElement||document.webkitFullscreenElement;
+      if(brief&&fs===brief&&overlay.parentElement!==brief){overlay.dataset.dscanOriginalParent='body';brief.appendChild(overlay);}
+      overlay.classList.add('open');
+    }
     document.body.style.overflow='hidden';
   }
 
   function closeCartoon(ev){
     if(ev && ev.target && ev.target.id!=='lawCartoonOverlay')return;
-    document.getElementById('lawCartoonOverlay')?.classList.remove('open');
+    const cartoonOverlay=document.getElementById('lawCartoonOverlay');
+    cartoonOverlay?.classList.remove('open');
+    if(cartoonOverlay?.dataset.dscanOriginalParent==='body'&&cartoonOverlay.parentElement!==document.body){document.body.appendChild(cartoonOverlay);}
+    if(cartoonOverlay)delete cartoonOverlay.dataset.dscanOriginalParent;
     cartoonCard=null;
     cartoonScale=1;
 
@@ -13923,7 +14035,12 @@ body.briefing-mode-active #tab-briefing .viewerStage{
         relWrap.textContent='현재 LawDB에서 연결된 인용·위임 조문이 없습니다.';
       }
     }
-    if(overlay)overlay.classList.add('open');
+    if(overlay){
+      const brief=document.getElementById('tab-briefing');
+      const fs=document.fullscreenElement||document.webkitFullscreenElement;
+      if(brief&&fs===brief&&overlay.parentElement!==brief){overlay.dataset.dscanOriginalParent='body';brief.appendChild(overlay);}
+      overlay.classList.add('open');
+    }
     document.body.style.overflow='hidden';
   }
 
@@ -13956,7 +14073,12 @@ body.briefing-mode-active #tab-briefing .viewerStage{
     if(text)text.textContent=formatLawDetailText(bodyText)||'현재 ZIP/세션에는 이 법령의 조문 본문이 저장되어 있지 않습니다.';
     if(relWrap)relWrap.textContent='LawDB에서 연결된 조문을 찾지 못했습니다.';
     try{syncCartoonButton(null);}catch(e){}
-    if(overlay)overlay.classList.add('open');
+    if(overlay){
+      const brief=document.getElementById('tab-briefing');
+      const fs=document.fullscreenElement||document.webkitFullscreenElement;
+      if(brief&&fs===brief&&overlay.parentElement!==brief){overlay.dataset.dscanOriginalParent='body';brief.appendChild(overlay);}
+      overlay.classList.add('open');
+    }
     document.body.style.overflow='hidden';
     return false;
   }
@@ -13969,6 +14091,8 @@ body.briefing-mode-active #tab-briefing .viewerStage{
       overlay.style.visibility='';
       overlay.style.pointerEvents='';
       delete overlay.dataset.hiddenByCartoon;
+      if(overlay.dataset.dscanOriginalParent==='body'&&overlay.parentElement!==document.body){document.body.appendChild(overlay);}
+      delete overlay.dataset.dscanOriginalParent;
     }
     document.body.style.overflow='';
   }
@@ -14726,7 +14850,7 @@ body.briefing-mode-active #tab-briefing .viewerStage{
   }
 
   window.SHELegal={
-    search,manualSearch,scheduleRowSearch,renderAllRowLawCells,renderRowLawCell,
+    search,manualSearch,scheduleRowSearch,renderAllRowLawCells,renderRowLawCell,openRowLawDetail,
     setResultLimit,toggleRowOptions,toggleLawGroupMore,addManualLaw,toggleResult,applyResult,removeLaw,openLawDetail,openLawDetailRef,resolveLawRefArticleId,closeLawDetail,openCartoon,closeCartoon,backToLawDetail,cartoonZoom,cartoonResetZoom,openCartoonSource,openOfficialLaw,officialSearchUrl,
     toggleValidationCenter,runValidationQuery,openValidationDetail,openValidationOfficial,setValidationAnswer,removeValidationExpected,runRegression,loadValidationCase,deleteValidationCase,
     loadValidationExamples,exportValidation,importValidation,
@@ -16850,7 +16974,7 @@ document.addEventListener('change',function(e){
       <td>${resultControls(r,i)}</td>
       <td class="dscan-finding-cell"><textarea class="f-finding" placeholder="${r.resultCategory==='우수사례'?'우수사례 내용을 입력하세요.':'부적합사항 또는 현장 메모를 입력하세요.'}">${esc(r.mainText||'')}</textarea></td>
       <td class="briefingToggleCell"><label class="briefingToggleLabel"><input type="checkbox" class="f-briefingIncluded" ${r.briefingIncluded!==false?'checked':''}><span>${r.briefingIncluded!==false?'포함':'제외'}</span></label></td>
-      <td class="auditPhotoConnectCell"><div class="audit-photo-actions"><button onclick="triggerCamera(${i})">촬영</button><button onclick="triggerGallery(${i})">선택</button></div><input class="hiddenInput" id="cameraInput_${i}" type="file" accept="image/*" capture="environment" onchange="attachFilesToRow(event,${i},true)"><input class="hiddenInput" id="galleryInput_${i}" type="file" accept="image/*" multiple onchange="attachFilesToRow(event,${i},false)"><div class="linkedThumbs">${linkedPhotosForRow(i).map(p=>`<div class="linkedThumb"><img src="${p.url}" title="${esc(p.name)}"><button class="unlinkBtn" onclick="unlinkPhoto('${p.id}')">×</button></div>`).join('')}</div></td>
+      <td class="auditPhotoConnectCell"><div class="audit-photo-actions"><button onclick="triggerCamera(${i})">촬영</button><button onclick="triggerGallery(${i})">선택</button></div><input class="hiddenInput" id="cameraInput_${i}" type="file" accept="image/*" capture="environment" onchange="attachFilesToRow(event,${i},true)"><input class="hiddenInput" id="galleryInput_${i}" type="file" accept="image/*" multiple onchange="attachFilesToRow(event,${i},false)"><div class="linkedThumbs">${linkedPhotosForRow(i).map((p,pi,arr)=>`<div class="linkedThumb dscan-linked-photo"><img src="${p.url}" title="${esc(p.name)}"><button class="unlinkBtn" title="연결 해제" onclick="unlinkPhoto('${p.id}')">×</button><button type="button" class="dscan-photo-order-btn prev" title="사진 순서 앞으로 이동" aria-label="사진 순서 앞으로 이동" ${pi===0?'disabled':''} onclick="event.stopPropagation();moveLinkedPhoto('${p.id}',-1)">‹</button><button type="button" class="dscan-photo-rotate-btn" title="90° 회전" aria-label="사진 90도 회전" onclick="event.stopPropagation();rotatePhoto90('${p.id}')">↻</button><button type="button" class="dscan-photo-order-btn next" title="사진 순서 뒤로 이동" aria-label="사진 순서 뒤로 이동" ${pi===arr.length-1?'disabled':''} onclick="event.stopPropagation();moveLinkedPhoto('${p.id}',1)">›</button></div>`).join('')}</div></td>
       <td class="photoRiskCell">${typeof renderRowPhotoRiskActions==='function'?renderRowPhotoRiskActions(i):''}</td>
     </tr>`;}).join('');
     bindRowInputs();
@@ -17177,7 +17301,7 @@ document.addEventListener('change',function(e){
   window.renderBriefingList=function(){
     const el=document.getElementById('briefingList');if(!el)return;if(!briefingItems.length){el.innerHTML='강평 포함 항목 없음';return;}
     const groups=['우수사례','부적합','적합'].map(result=>({result,items:briefingItems.map((item,idx)=>({...item,__idx:idx})).filter(x=>x.row.resultCategory===result)})).filter(g=>g.items.length);
-    el.innerHTML=groups.map(g=>`<div style="margin-bottom:12px"><div style="font-weight:800;margin-bottom:6px">${g.result==='우수사례'?'🏆 ':g.result==='부적합'?'⚠ ':'✓ '}${g.result}</div>${g.items.map(item=>`<div style="padding:8px;border:1px solid #374151;border-radius:10px;margin-bottom:8px;cursor:pointer;${item.__idx===currentItemIndex?'outline:2px solid #60a5fa;':''}" onclick="selectBriefingItem(${item.__idx})">${item.__idx===currentItemIndex?'▶ ':''}No.${item.row.no||item.rowIndex+1} / ${esc(item.row.subCategory||item.row.title||'(제목없음)')} (${item.linkedPhotos.length}장)</div>`).join('')}</div>`).join('');
+    el.innerHTML=groups.map(g=>`<div class="dscan-brief-list-group"><div class="dscan-brief-list-group-title">${g.result==='우수사례'?'🏆 ':g.result==='부적합'?'⚠ ':'✓ '}${g.result}</div>${g.items.map(item=>`<div class="dscan-brief-list-item ${item.__idx===currentItemIndex?'active':''}" onclick="selectBriefingItem(${item.__idx})">${item.__idx===currentItemIndex?'▶ ':''}No.${item.row.no||item.rowIndex+1} / ${esc(item.row.subCategory||item.row.title||'(제목없음)')} (${item.linkedPhotos.length}장)</div>`).join('')}</div>`).join('');
   };
   window.renderMeta=function(){
     const item=briefingItems[currentItemIndex];if(!item)return;
@@ -17373,94 +17497,14 @@ document.addEventListener('change',function(e){
 
 <script id="dscan-v405-briefing-toolbar-autohide-restore">
 (function(){
-  const HIDE_DELAY=1000;
-  let timer=0;
-
-  function tab(){return document.getElementById('tab-briefing');}
-  function bar(){return document.getElementById('briefingToolbarProtected');}
-  function isFs(){
-    const t=tab();
-    return !!t && (document.fullscreenElement===t || document.webkitFullscreenElement===t);
+  'use strict';
+  function keepVisible(){
+    const tab=document.getElementById('tab-briefing');const bar=document.getElementById('briefingToolbarProtected');
+    if(tab)tab.classList.remove('briefing-autohide-active','briefing-toolbar-hidden','briefing-toolbar-visible');
+    if(bar)bar.classList.remove('dscan-brief-toolbar-hidden','dscan-brief-toolbar-visible');
   }
-  function isPresentation(){
-    try{
-      return !!isBriefingMode || isFs();
-    }catch(e){
-      return isFs();
-    }
-  }
-  function clearTimer(){
-    if(timer){clearTimeout(timer);timer=0;}
-  }
-  function show(schedule=true){
-    const t=tab(),b=bar();
-    if(!t||!b)return;
-    if(!isPresentation()){
-      t.classList.remove('briefing-autohide-active');
-      b.classList.remove('dscan-brief-toolbar-hidden','dscan-brief-toolbar-visible');
-      clearTimer();
-      return;
-    }
-    t.classList.add('briefing-autohide-active');
-    b.classList.remove('dscan-brief-toolbar-hidden');
-    b.classList.add('dscan-brief-toolbar-visible');
-    clearTimer();
-    if(schedule)timer=setTimeout(hide,HIDE_DELAY);
-  }
-  function hide(){
-    timer=0;
-    const t=tab(),b=bar();
-    if(!t||!b||!isPresentation())return;
-    const focused=document.activeElement;
-    if(b.matches(':hover') || (focused&&b.contains(focused))){
-      show(true);
-      return;
-    }
-    b.classList.remove('dscan-brief-toolbar-visible');
-    b.classList.add('dscan-brief-toolbar-hidden');
-  }
-  function activity(){
-    if(isPresentation())show(true);
-  }
-  function sync(){
-    setTimeout(()=>{
-      if(isPresentation())show(true);
-      else show(false);
-    },0);
-  }
-
-  ['pointermove','pointerdown','mousemove','touchstart','touchmove','wheel','keydown'].forEach(type=>{
-    document.addEventListener(type,activity,{capture:true,passive:type!=='keydown'});
-  });
-  document.addEventListener('scroll',activity,true);
-  document.addEventListener('fullscreenchange',sync);
-  document.addEventListener('webkitfullscreenchange',sync);
-
-  document.addEventListener('focusin',function(e){
-    const b=bar();
-    if(isPresentation()&&b&&b.contains(e.target)){
-      clearTimer();
-      show(false);
-    }
-  },true);
-  document.addEventListener('focusout',function(){
-    if(isPresentation())show(true);
-  },true);
-
-  /* Hook presentation toggle without changing the protected original engine. */
-  const oldToggle=window.toggleBriefingPresentationMode;
-  if(typeof oldToggle==='function'&&!oldToggle.__dscanV405Wrapped){
-    const wrapped=async function(){
-      const out=await oldToggle.apply(this,arguments);
-      sync();
-      return out;
-    };
-    wrapped.__dscanV405Wrapped=true;
-    window.toggleBriefingPresentationMode=wrapped;
-    window.toggleFullscreen=function(){return window.toggleBriefingPresentationMode();};
-  }
-
-  sync();
+  document.addEventListener('fullscreenchange',keepVisible);
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',keepVisible,{once:true});else keepVisible();
 })();
 </script>
 
@@ -19494,7 +19538,7 @@ document.addEventListener('change',function(e){
     }
   };
 
-  window.completeInspectionSession=function(){
+  window.completeInspectionSession=async function(){
     try{window.cancelScheduledInspectionPersist?.()}catch(e){}
     const s=readSession();
     if(!s?.id){
@@ -19546,6 +19590,22 @@ document.addEventListener('change',function(e){
     );
     if(!ok)return;
 
+    /* Completion photo checkpoint — LOCK must never become a photo-loss boundary.
+       If runtime photos vanished before completion, recover the session payload first.
+       If runtime photos are present, checkpoint them before any cleanup. */
+    try{
+      const beforeLinked=(Array.isArray(photos)?photos:[]).filter(p=>p&&p.rowIndex!==''&&p.rowIndex!==null&&p.rowIndex!==undefined);
+      if(beforeLinked.length===0&&window.DSCANPhotoPersistence?.restore){
+        await window.DSCANPhotoPersistence.restore(s.id,true);
+      }else if(window.DSCANPhotoPersistence?.persist){
+        await window.DSCANPhotoPersistence.persist(s.id);
+      }
+    }catch(e){
+      console.error('[DSCAN completion photo checkpoint]',e);
+      const proceed=confirm('사진 저장상태를 확인하지 못했습니다.\n\n기술지원 완료를 계속하면 사진 복구가 어려울 수 있습니다.\n그래도 완료하시겠습니까?');
+      if(!proceed)return;
+    }
+
     /* Linked-photo cleanup is independent from row state. */
     try{
       const linkedOnly=[];
@@ -19559,7 +19619,7 @@ document.addEventListener('change',function(e){
       window.__dscanSessionPhotoCache=window.__dscanSessionPhotoCache||{};
       window.__dscanSessionPhotoCache[s.id]=photos.slice();
       try{window.renderPhotosHub?.();window.rebuildBriefingItems?.();window.renderBriefingList?.()}catch(e){}
-      try{window.DSCANPhotoPersistence?.persist?.(s.id)}catch(e){}
+      try{if(window.DSCANPhotoPersistence?.persist)await window.DSCANPhotoPersistence.persist(s.id)}catch(e){console.error('[DSCAN completion final photo persist]',e)}
     }catch(e){console.error('[DSCAN completion unlinked purge]',e)}
 
     const now=new Date().toISOString();
@@ -20726,9 +20786,9 @@ ${err?.message||err}`);
      완료 후 다시 persist하는 지연 wrapper는 두 번째 클릭/늦은 UI 전환의 원인이 될 수 있어 제거한다. */
   const baseComplete=window.completeInspectionSession;
   if(typeof baseComplete==='function'){
-    window.completeInspectionSession=function(){
+    window.completeInspectionSession=async function(){
       window.persistCurrentInspectionSnapshot?.();
-      const out=baseComplete.apply(this,arguments);
+      const out=await baseComplete.apply(this,arguments);
 
       const done=session();
       if(done?.id && isDone(done)){
@@ -21648,7 +21708,7 @@ ${err?.message||err}`);
 /* v4.5.84 — briefing micro-detail refinement */
 #tab-briefing .metaPanel .dscan-meta-path{font-size:13px!important;line-height:1.5!important;font-weight:800!important;color:#d9e9ff!important}
 #tab-briefing .metaPanel .dscan-main-point-label{margin-top:14px!important;font-size:11px!important;font-weight:900!important;color:#8fb5e6!important;letter-spacing:.02em}
-#tab-briefing .metaPanel .dscan-main-point{margin-top:5px!important;padding:12px 13px!important;border:1px solid #315982!important;border-left:4px solid #5b9dff!important;border-radius:9px!important;background:linear-gradient(90deg,rgba(37,86,142,.28),rgba(19,45,75,.18))!important;color:#f4f8ff!important;font-size:15px!important;line-height:1.58!important;font-weight:850!important;text-shadow:0 1px 0 rgba(0,0,0,.18)}
+#tab-briefing .metaPanel .dscan-main-point{margin-top:6px!important;padding:16px 17px!important;border:1px solid #315982!important;border-left:4px solid #5b9dff!important;border-radius:9px!important;background:linear-gradient(90deg,rgba(37,86,142,.28),rgba(19,45,75,.18))!important;color:#f4f8ff!important;font-size:20px!important;line-height:1.58!important;font-weight:850!important;letter-spacing:-.018em!important;text-shadow:0 1px 0 rgba(0,0,0,.18)}
 #tab-briefing #dscanBriefSummary .dscan-summary-title h2{font-size:24px!important;letter-spacing:-.02em}
 #tab-briefing #dscanBriefSummary .dscan-summary-kpis{grid-template-columns:repeat(5,minmax(0,1fr))!important}
 #tab-briefing #dscanBriefSummary .dscan-summary-kpi{min-height:82px!important;padding:14px 15px!important;background:linear-gradient(180deg,#132b49,#10243d)!important;border-color:#345579!important}
@@ -22313,7 +22373,7 @@ ${err?.message||err}`);
       blob:blob instanceof Blob?blob:null,
       dataUrlCache:(!blob&&typeof p?.dataUrlCache==='string')?p.dataUrlCache:'',
       riskStatus:p?.riskStatus||'ready',riskAnalysis:p?.riskAnalysis||null,riskError:p?.riskError||'',
-      sourceName:p?.sourceName||'',photoTag:p?.photoTag||'',lastSavedAt:new Date().toISOString()
+      sourceName:p?.sourceName||'',photoTag:p?.photoTag||'',sortOrder:Number.isFinite(Number(p?.sortOrder))?Number(p.sortOrder):0,rotation:Number(p?.rotation||0),lastSavedAt:new Date().toISOString()
     };
   }
   async function persistPhotos(sessionId){
@@ -23000,7 +23060,12 @@ else setTimeout(polish,160);
             row.profileId=key;
             row.part=NAMES[key];
             if(row.sourceSession&&typeof row.sourceSession==='object')row.sourceSession.profileId=key;
-            const photos=(ws.photos||[]).filter(p=>String(p.rowIndex)===String(i));
+            const photos=(ws.photos||[]).filter(p=>String(p.rowIndex)===String(i)).sort((a,b)=>{
+              const ao=Number.isFinite(Number(a?.sortOrder))?Number(a.sortOrder):Number.MAX_SAFE_INTEGER;
+              const bo=Number.isFinite(Number(b?.sortOrder))?Number(b.sortOrder):Number.MAX_SAFE_INTEGER;
+              if(ao!==bo)return ao-bo;
+              return String(a?.id||'').localeCompare(String(b?.id||''));
+            });
             out.push({row,rowIndex:i,photos,linkedPhotos:photos,workspaceKey:key,workspaceOrigin:ws.origin||''});
           });
         });
@@ -23542,7 +23607,14 @@ async function mergeSameSession(bundle){
         if(blank(cv)&&!blank(iv))take=true;
         else if(!blank(cv)&&!blank(iv)&&!eq(cv,iv))conflict=true;
       }
-      if(take){cr[field]=deep(iv);applied++}
+      if(take){
+        cr[field]=deep(iv);
+        /* Safe-merge canonical write-through: generic persistence reapplies the Critical Runtime Journal.
+           Therefore an accepted ZIP value must update the same journal BEFORE persist, otherwise an older
+           local mainText/score/result/briefing value can silently overwrite the just-merged value. */
+        try{window.DSCAN_RuntimeJournal?.writeFields?.(cr,hit.i,{[field]:deep(iv)})}catch(e){console.error('[DSCAN safe merge journal write-through]',e)}
+        applied++
+      }
       else if(conflict){
         addConflict({
           rowKey:key,rowIndex:hit.i,incomingIndex:ii,
@@ -23844,7 +23916,9 @@ window.DSCANWorkTransfer={
         merge.title=same?'같은 기술지원 세션으로 확인되었습니다. 안전 병합합니다.':'현재 세션과 ZIP의 사업장·파트·기간을 다시 확인합니다. 다른 세션이면 병합하지 않고 안내합니다.';
       }
       if(!a?.id){
-        await restoreBundle(bundle);this.pending=null;return;
+        if(meta)meta.textContent+=` · 현재 활성 세션 없음`;
+        const merge=document.getElementById('dscanWorkMergeBtn');
+        if(merge)merge.title='현재 활성 기술지원 세션이 없어 합칠 대상이 없습니다. 새 세션으로 가져오기를 사용하세요.';
       }
       document.getElementById('dscanWorkTransferOverlay')?.classList.add('open');
     }catch(e){console.error(e);alert('작업 ZIP 불러오기 오류: '+e.message)}
@@ -24945,6 +25019,13 @@ const priorShowTab=window.showTab;
 if(typeof priorShowTab==='function'){
   window.showTab=function(name,btn,options){
     if(name==='briefing'){openLobby();return true}
+    if(document.body.classList.contains('briefing-mode-active')){
+      try{if(typeof exitBriefingMode==='function')exitBriefingMode()}catch(e){}
+      document.body.classList.remove('briefing-mode-active');
+    }
+    try{if(document.getElementById('lawCartoonOverlay')?.classList.contains('open'))window.SHELegal?.closeCartoon?.()}catch(e){}
+    try{if(document.getElementById('lawDetailOverlay')?.classList.contains('open'))window.SHELegal?.closeLawDetail?.()}catch(e){}
+    if(!document.querySelector('.photo-risk-overlay.open,.hidden-admin-overlay[style*="flex"]'))document.body.style.overflow='';
     if(name==='home'&&!options?.freshHome)window.resetHomeEntryState?.();
     const out=priorShowTab.apply(this,arguments);setTimeout(syncAuditBodyClass,0);return out;
   };
@@ -24970,6 +25051,34 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 })();
 </script>
 
+
+<script id="dscan-pwa-back-navigation-guard">
+(function(){
+  'use strict';
+  let allowingExit=false;
+  function activeTab(){return document.querySelector('.tabpage.active')?.id?.replace(/^tab-/,'')||'home';}
+  function rearm(){try{history.pushState({dscanGuard:true},'',location.href)}catch(e){}}
+  function closeTopLayer(){
+    const law=document.getElementById('lawDetailOverlay');if(law?.classList.contains('open')){try{window.SHELegal?.closeLawDetail?.()}catch(e){};return true;}
+    if(document.fullscreenElement){try{document.exitFullscreen()}catch(e){};return true;}
+    const brief=document.getElementById('tab-briefing');
+    if(brief?.classList.contains('active')){
+      if(!brief.classList.contains('dscan-lobby-active')){try{window.DSCANBriefingCenter?.finish?.()}catch(e){};return true;}
+      try{window.showTab?.('home',document.getElementById('tabBtnHome'),{skipGate:true});return true}catch(e){}
+    }
+    if(activeTab()!=='home'){try{window.showTab?.('home',document.getElementById('tabBtnHome'),{skipGate:true});return true}catch(e){}}
+    return false;
+  }
+  window.addEventListener('popstate',function(){
+    if(allowingExit)return;
+    if(closeTopLayer()){rearm();return;}
+    const ok=confirm('디스캔(DSCAN)을 종료하시겠습니까?');
+    if(ok){allowingExit=true;history.back();}
+    else rearm();
+  });
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',rearm,{once:true});else rearm();
+})();
+</script>
 
 <script id="dscan-pwa-bootstrap">
 /* DSCAN PWA bootstrap — isolated from inspection/session state */
