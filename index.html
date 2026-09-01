@@ -8841,7 +8841,15 @@ function briefingPhotosForRow(rowIndex,sourcePhotos=null,rowOverride=null){
   const r=rowOverride||rows?.[Number(rowIndex)]||{};
   const linked=Array.isArray(sourcePhotos)?sourcePhotos:linkedPhotosForRow(rowIndex);
   const selected=Array.isArray(r.briefingPhotoIds)?new Set(r.briefingPhotoIds.map(String)):null;
-  return linked.map((p,idx)=>Object.assign({},p,{__briefingOrdinal:idx+1})).filter(p=>!selected||selected.has(String(p.id)));
+  /* ZIP aggregate/work-transfer may need an internal collision-safe runtime id, but the user's
+     briefing photo selection is saved against the original photo id.  Match both identities so
+     imported photos can never disappear only because their runtime id was remapped. */
+  return linked.map((p,idx)=>Object.assign({},p,{__briefingOrdinal:idx+1})).filter(p=>{
+    if(!selected)return true;
+    const runtimeId=String(p?.id||'');
+    const sourceId=String(p?.sourcePhotoId||'');
+    return selected.has(runtimeId)||(sourceId&&selected.has(sourceId));
+  });
 }
 window.DSCAN_getBriefingPhotosForRow=briefingPhotosForRow;
 window.setBriefingPhotoIncluded=function(rowIndex,photoId,included){
@@ -10300,9 +10308,28 @@ function findPhotoEntryInSessionZip(zip,meta){
     const direct=zip.file(meta.archivePath);
     if(direct)return direct;
   }
-  // Legacy ZIP compatibility
   const safeName=String(meta?.name||'').replace(/[\/:*?"<>|]+/g,'_');
-  return zip.file('linked_photos/'+safeName)||null;
+  const legacy=zip.file('linked_photos/'+safeName);
+  if(legacy)return legacy;
+
+  /* Cross-version rescue: some field ZIPs contain the binary correctly under photos/linked/
+     while older metadata has no archivePath (or a stale one).  Resolve by exact basename,
+     then by the canonical "<photoId>_<filename>" suffix/prefix used by newer exports. */
+  const entries=Object.keys(zip.files||{}).filter(name=>{
+    const e=zip.files[name];return name.startsWith('photos/linked/')&&e&&!e.dir;
+  });
+  if(!entries.length)return null;
+  const base=name=>String(name||'').split('/').pop();
+  let hit=entries.find(name=>base(name)===safeName);
+  if(hit)return zip.file(hit);
+  hit=entries.find(name=>base(name).endsWith('_'+safeName));
+  if(hit)return zip.file(hit);
+  const safeId=String(meta?.id||'').replace(/[^0-9A-Za-z_-]+/g,'_');
+  if(safeId){
+    hit=entries.find(name=>base(name).startsWith(safeId+'_'));
+    if(hit)return zip.file(hit);
+  }
+  return null;
 }
 async function restorePhotoFromSessionMeta(zip,p,indexSuffix=''){
   const entry=findPhotoEntryInSessionZip(zip,p);
@@ -17322,8 +17349,24 @@ document.addEventListener('change',function(e){
     const session=JSON.parse(await ent.async('string'));
     if(Array.isArray(session.fieldDefs)&&typeof mergeFieldDefs==='function')mergeFieldDefs(session.fieldDefs);
     const importedRows=(session.rows||[]).map(x=>{const r=normalizeOperationalRow(clone(x));r.sourceInspector=session.inspector||null;r.sourceSession=session.inspectionSession||session.audit||null;return r;});
-    const importedPhotos=[];for(let pi=0;pi<(session.photos||[]).length;pi++){const restored=await restorePhotoFromSessionMeta(zip,session.photos[pi],`${Date.now()}_${pi}`);if(restored)importedPhotos.push(restored);}
-    return{audit:session.audit||{},importedRows,importedPhotos,legalCaseLibrary:session.legalCaseLibrary||null,inspector:session.inspector||null,inspectionSession:session.inspectionSession||null};
+    const photoMeta=Array.isArray(session.photos)?session.photos:[];
+    const archivePhotoCount=Object.keys(zip.files||{}).filter(name=>name.startsWith('photos/linked/')&&!zip.files[name]?.dir).length+
+      Object.keys(zip.files||{}).filter(name=>name.startsWith('linked_photos/')&&!zip.files[name]?.dir).length;
+    const importedPhotos=[];
+    for(let pi=0;pi<photoMeta.length;pi++){
+      const restored=await restorePhotoFromSessionMeta(zip,photoMeta[pi],`${Date.now()}_${pi}`);
+      if(restored)importedPhotos.push(restored);
+    }
+    /* A ZIP with photo binaries must never be reported as a successful briefing import when the
+       photos could not be reconstructed.  Fail visibly instead of silently creating a text-only
+       aggregate. */
+    if(photoMeta.length&&importedPhotos.length!==photoMeta.length){
+      throw new Error(`${file.name}: 사진 복원 검증 실패 · 메타 ${photoMeta.length}장 / 복원 ${importedPhotos.length}장 / ZIP 사진파일 ${archivePhotoCount}장`);
+    }
+    if(!photoMeta.length&&archivePhotoCount>0){
+      throw new Error(`${file.name}: ZIP 안에 사진파일 ${archivePhotoCount}장이 있으나 사진 연결정보(session.photos)가 없습니다. 원본 ZIP을 보존하고 관리자에게 확인해주세요.`);
+    }
+    return{audit:session.audit||{},importedRows,importedPhotos,legalCaseLibrary:session.legalCaseLibrary||null,inspector:session.inspector||null,inspectionSession:session.inspectionSession||null,photoAudit:{meta:photoMeta.length,restored:importedPhotos.length,archive:archivePhotoCount}};
   };
 
   window.buildRawdbRowsWithPhotoNames=function(){
@@ -18685,11 +18728,26 @@ document.addEventListener('change',function(e){
       const ws=workspace(map.key);
       const duplicate=ws.photos.some(x=>x.name===p.name&&String(x.rowIndex)===String(map.dest));
       if(duplicate)return;
+      const originalId=String(p.id||'');
+      let runtimeId=originalId||('IMP_'+Math.random().toString(36).slice(2,10));
+      const idCollision=ws.photos.some(x=>String(x.id)===runtimeId&&!(x.name===p.name&&String(x.rowIndex)===String(map.dest)));
+      if(idCollision)runtimeId=runtimeId+'_agg_'+Math.random().toString(36).slice(2,6);
+      const blob=p.blob instanceof Blob?p.blob:(p.file instanceof Blob?p.file:null);
+      const workspaceUrl=blob?URL.createObjectURL(blob):(p.dataUrlCache||p.url||'');
       ws.photos.push({
         ...p,
-        id:(p.id||'IMP')+'_'+Math.random().toString(36).slice(2,8),
+        id:runtimeId,
+        sourcePhotoId:originalId||runtimeId,
+        blob:blob||p.blob||null,
+        file:null,
+        url:workspaceUrl,
         rowIndex:String(map.dest)
       });
+      if(idCollision&&originalId){
+        const row=ws.rows[map.dest];
+        if(Array.isArray(row?.briefingPhotoIds))row.briefingPhotoIds=row.briefingPhotoIds.map(id=>String(id)===originalId?runtimeId:String(id));
+      }
+      try{if(blob&&String(p.url||'').startsWith('blob:')&&p.url!==workspaceUrl)URL.revokeObjectURL(p.url)}catch(e){}
     });
   }
   function syncActiveBack(){
@@ -23880,7 +23938,15 @@ async function mergeSameSession(bundle){
     const target=incomingToCurrent.has(src)?incomingToCurrent.get(src):src;
     const dup=curPhotos.some(x=>String(x.rowIndex)===String(target)&&String(x.name||'')===String(p.name||''));
     if(dup)return;
-    curPhotos.push({...p,id:`${p.id||'P'}_merge_${Math.random().toString(36).slice(2,6)}`,rowIndex:String(target)});
+    const originalId=String(p.id||'');
+    let runtimeId=originalId||`P_merge_${Math.random().toString(36).slice(2,8)}`;
+    const idCollision=curPhotos.some(x=>String(x.id)===runtimeId&&!(String(x.rowIndex)===String(target)&&String(x.name||'')===String(p.name||'')));
+    if(idCollision)runtimeId=runtimeId+`_merge_${Math.random().toString(36).slice(2,6)}`;
+    curPhotos.push({...p,id:runtimeId,sourcePhotoId:originalId||runtimeId,rowIndex:String(target)});
+    if(idCollision&&originalId){
+      const rr=current[target];
+      if(Array.isArray(rr?.briefingPhotoIds))rr.briefingPhotoIds=rr.briefingPhotoIds.map(id=>String(id)===originalId?runtimeId:String(id));
+    }
     photoAdded++;
   });
 
