@@ -1,5 +1,5 @@
-/* DSCAN PWA Service Worker v4.6.41 — app-shell only; no DSCAN runtime/session persistence */
-const VERSION = 'dscan-pwa-v4.6.41';
+/* DSCAN PWA Service Worker v4.6.42 — app-shell only; no DSCAN runtime/session persistence */
+const VERSION = 'dscan-pwa-v4.6.42';
 const SHELL_CACHE = `${VERSION}-shell`;
 const RUNTIME_CACHE = `${VERSION}-runtime`;
 const APP_SHELL = [
