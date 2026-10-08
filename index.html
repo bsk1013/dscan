@@ -17000,15 +17000,15 @@ document.addEventListener('change',function(e){
       <td class="toolbar-mini ed-col-tools">
         <div class="dscan-row-tools-grid">
           <button type="button" class="row-fold-btn" title="행 접기/펼치기" onclick="toggleEditorRowCompact(${i},this)">▼</button>
-          <button type="button" title="위로 이동" onclick="moveRowUp(${i})">↑</button>
-          <button type="button" title="아래로 이동" onclick="moveRowDown(${i})">↓</button>
-          <button type="button" class="row-clone-btn" onclick="cloneRow(${i})">복제</button>
-          <button type="button" class="row-delete-btn" onclick="deleteRow(${i})">삭제</button>
+          <button type="button" title="위로 이동" onclick="DSCAN_editorMoveRow(${i},-1)">↑</button>
+          <button type="button" title="아래로 이동" onclick="DSCAN_editorMoveRow(${i},1)">↓</button>
+          <button type="button" class="row-clone-btn" onclick="DSCAN_editorCloneRow(${i})">복제</button>
+          <button type="button" class="row-delete-btn" onclick="DSCAN_editorDeleteRow(${i})">삭제</button>
         </div>
       </td>
     </tr>`;}).join('');
     document.querySelectorAll('#editorTbl tbody tr').forEach(tr=>{
-      const i=Number(tr.dataset.editorRow);const sync=()=>{const r=rows[i];r.category6=tr.querySelector('.e-category6').value;r.midCategory=tr.querySelector('.e-midCategory').value;r.subCategory=tr.querySelector('.e-subCategory').value;r.title=r.subCategory;r.criteria=tr.querySelector('.e-criteria').value;r.sourceLawText=tr.querySelector('.e-sourceLaw').value;r.maxScore=safeNum(tr.querySelector('.e-maxScore').value);r.evaluationStatus=tr.querySelector('.e-evaluationStatus').value;syncDerived(r);renderRows();updateEditorSummary();saveActiveProfileFromRows();};tr.querySelectorAll('input,textarea,select').forEach(el=>{el.addEventListener('change',sync);el.addEventListener('blur',sync);});});
+      const i=Number(tr.dataset.editorRow);const sync=()=>{const r=rows[i];r.category6=tr.querySelector('.e-category6').value;r.midCategory=tr.querySelector('.e-midCategory').value;r.subCategory=tr.querySelector('.e-subCategory').value;r.title=r.subCategory;r.criteria=tr.querySelector('.e-criteria').value;r.sourceLawText=tr.querySelector('.e-sourceLaw').value;r.maxScore=safeNum(tr.querySelector('.e-maxScore').value);r.evaluationStatus=tr.querySelector('.e-evaluationStatus').value;syncDerived(r);updateEditorSummary();saveActiveProfileFromRows();};tr.querySelectorAll('input,textarea,select').forEach(el=>{el.addEventListener('change',sync);el.addEventListener('blur',sync);});});
     updateEditorSummary();
   };
   window.toggleEditorRowCompact=function(i,btn){
@@ -17059,6 +17059,28 @@ document.addEventListener('change',function(e){
     saveProfiles(all);
   }
   window.saveActiveProfileFromRows=saveActiveProfileFromRows;
+
+  /* Editor Master operations only; the existing profileRows() remains the single
+     source for NEW inspection sessions. Active session snapshots are untouched. */
+  function dscanEditorApply(action,i,delta){
+    if(!PROFILE_ORDER.includes(editorLoadedProfileId)||!Array.isArray(rows)||!Number.isInteger(i)||i<0||i>=rows.length)return;
+    if(rows.some(r=>String(r?.profileId||'')!==editorLoadedProfileId))return;
+    if(action==='move'){
+      const j=i+delta;if(j<0||j>=rows.length)return;
+      [rows[i],rows[j]]=[rows[j],rows[i]];
+    }else if(action==='clone'){
+      const item=clone(rows[i]);ensureRowExtras(item);rows.splice(i+1,0,item);
+    }else if(action==='delete'){
+      if(rows.length<=1)return;
+      rows.splice(i,1);
+    }else return;
+    saveActiveProfileFromRows();
+    renderEditor();
+  }
+  window.DSCAN_editorMoveRow=(i,d)=>dscanEditorApply('move',i,d);
+  window.DSCAN_editorCloneRow=i=>dscanEditorApply('clone',i,0);
+  window.DSCAN_editorDeleteRow=i=>dscanEditorApply('delete',i,0);
+
 
   /* 에디터 Master rows와 기술지원 Runtime rows를 완전히 분리한다. */
   const __dscanShowTabBeforeEditorProfile=window.showTab;
@@ -17434,7 +17456,7 @@ document.addEventListener('change',function(e){
       (Array.isArray(r.sourceInspectors)?r.sourceInspectors:[]).forEach(push);
     });
     const s=currentSession();DSCAN_sessionInspectorTeam(s).forEach(push);
-    const fixed=['이형진','최정원','권기민','박양균','배성경','정지윤'];
+    const fixed=['이형진','최정원','권기민','박양균','배성경','정지윤','박준','김현준','국보현','안제용','박재현'];
     return arr.sort((a,b)=>{
       const ai=fixed.indexOf(a?.name),bi=fixed.indexOf(b?.name);
       return (ai<0?999:ai)-(bi<0?999:bi)||String(a?.name||'').localeCompare(String(b?.name||''));
